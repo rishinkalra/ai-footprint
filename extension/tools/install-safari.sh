@@ -4,8 +4,12 @@
 #   cd extension && bash tools/install-safari.sh
 #
 # Needs: macOS with Safari 17 or later, Xcode (free, Mac App Store), Node.js 20+.
-# No Apple developer account is needed to run it on your own Mac; Safari just has
-# to allow unsigned extensions (step 2 below, printed again at the end).
+#
+# Signing: set TEAM to your Apple developer team ID (Xcode > Settings > Accounts)
+# and the app is signed with it, so Safari shows the extension like any other:
+#   TEAM=ABCDE12345 bash tools/install-safari.sh
+# Without TEAM it is signed for this Mac only, and Safari needs "Allow unsigned
+# extensions" turned on (Safari > Settings > Developer).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
@@ -58,9 +62,16 @@ PY
 SCHEME="$(xcodebuild -list -project "$PROJECT" 2>/dev/null | awk '/Schemes:/{getline; gsub(/^ +/, ""); print; exit}')"
 [[ -n "$SCHEME" ]] || fail "Could not find the app's build scheme in $PROJECT."
 
-step "Building the app (signed to run on this Mac only)"
+TEAM="${TEAM:-}"
+if [[ -n "$TEAM" ]]; then
+  step "Building the app, signed with your Apple developer team $TEAM"
+  SIGNING=(DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic -allowProvisioningUpdates -allowProvisioningDeviceRegistration)
+else
+  step "Building the app (signed to run on this Mac only)"
+  SIGNING=(CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="")
+fi
 xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
-  -derivedDataPath "$OUT/build" CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+  -derivedDataPath "$OUT/build" "${SIGNING[@]}" \
   build >"$OUT/build.log" 2>&1 || fail "The build failed. Details are in $OUT/build.log"
 
 APP="$(find "$OUT/build/Build/Products/Release" -name '*.app' -maxdepth 1 | head -n 1)"
@@ -70,19 +81,19 @@ step "Installing to ~/Applications and opening it, which registers the extension
 mkdir -p "$HOME/Applications"
 rm -rf "$HOME/Applications/$APP_NAME.app"
 cp -R "$APP" "$HOME/Applications/$APP_NAME.app"
-open "$HOME/Applications/$APP_NAME.app"
+codesign -dv "$HOME/Applications/$APP_NAME.app" 2>&1 | grep -E "Authority|TeamIdentifier|Signature" | head -3 || true
+# Launched outside this shell's process tree, so a CI runner's cleanup doesn't close it.
+RUNNER_TRACKING_ID="" open "$HOME/Applications/$APP_NAME.app"
 
 cat <<'DONE'
 
-Done. Now turn it on in Safari (about a minute):
-
-  1. Safari > Settings > Advanced: tick "Show features for web developers".
-  2. Safari > Settings > Developer: tick "Allow unsigned extensions".
-     Safari turns this off again each time it quits; just tick it again.
-  3. Safari > Settings > Extensions: tick "AI Footprint".
-  4. Click the AI Footprint icon next to the address bar, choose
-     "Always Allow on These Websites" for the AI sites, or allow each site
-     the first time you open it.
-  5. Open ChatGPT, Claude or Gemini and chat. The badge appears after each reply.
+Done. The AI Footprint window is open. Click "Quit and Open Safari Settings",
+tick "AI Footprint" in the list, then allow it on your AI sites when Safari asks.
+DONE
+if [[ -z "$TEAM" ]]; then cat <<'DONE'
+Because it isn't signed with a developer team, first turn on
+Safari > Settings > Advanced > "Show features for web developers", then
+Safari > Settings > Developer > "Allow unsigned extensions".
 
 DONE
+fi
