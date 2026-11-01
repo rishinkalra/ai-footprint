@@ -1,4 +1,11 @@
-# AI Footprint dashboard
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/logo-dark.png" />
+  <img src="../brand/logo-light.png" alt="AI Footprint" width="240" />
+</picture>
+
+# Dashboard
+
+<img src="../docs/images/dashboard-light.png" alt="The AI Footprint dashboard" width="760" />
 
 A small Node server and CLI that add up the **money, energy, carbon and water** behind your AI usage, across every platform you use. It runs on your own machine. The methodology is in [../METHODOLOGY.md](../METHODOLOGY.md).
 

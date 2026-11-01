@@ -2,3 +2,19 @@ AI Footprint
 Copyright 2026 Rishin Kalra and AI Footprint contributors
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+The AI Footprint name and logo are not covered by the license (see TRADEMARKS.md).
+
+This product includes third-party material:
+
+Fonts, licensed under the SIL Open Font License 1.1
+  Bricolage Grotesque, Copyright 2022 The Bricolage Grotesque Project Authors
+  (https://github.com/ateliertriay/bricolage)
+  Figtree, Copyright 2022 The Figtree Project Authors
+  (https://github.com/erikdkennedy/figtree)
+  License texts: extension/fonts/OFL-*.txt
+
+Data, licensed under Creative Commons Attribution 4.0 (CC BY 4.0)
+  Electricity carbon intensity and electricity demand per person by country
+  (extension/src/regions-data.js) are derived from Ember, Yearly Electricity
+  Data (2026), https://ember-energy.org/data/yearly-electricity-data/,
+  as compiled by Our World in Data, https://github.com/owid/energy-data

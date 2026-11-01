@@ -1,4 +1,9 @@
-# AI Footprint: browser extension
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../brand/logo-dark.png" />
+  <img src="../brand/logo-light.png" alt="AI Footprint" width="240" />
+</picture>
+
+# Browser extension
 
 See the estimated **energy, carbon, water and cost** behind every AI chat reply, wherever you use AI in a browser, and pick up lighter habits along the way.
 
