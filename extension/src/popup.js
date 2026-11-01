@@ -62,10 +62,10 @@
 
   function renderEmpty(s) {
     $('hero').className = 'card empty';
-    $('hero').innerHTML = '<h2>Your AI footprint starts here</h2>' +
+    FootprintDOM.set($('hero'), '<h2>Your AI footprint starts here</h2>' +
       '<p>Chat as usual on any of these apps. After each reply, a small badge shows its energy, and your totals appear here.</p>' +
       '<div class="sites">' + FootprintSites.SITES.map(function (x) { return '<span class="chip">' + esc(x.name) + '</span>'; }).join('') + '</div>' +
-      (s.goalWh > 0 ? '<p class="muted">Your daily goal: ' + esc(F.join(F.energy(s.goalWh))) + ', about ' + Math.round(s.goalWh / 0.3) + ' typical replies.</p>' : '');
+      (s.goalWh > 0 ? '<p class="muted">Your daily goal: ' + esc(F.join(F.energy(s.goalWh))) + ', about ' + Math.round(s.goalWh / 0.3) + ' typical replies.</p>' : ''));
     ['stats', 'chart', 'apps'].forEach(function (id) { $(id).hidden = true; });
   }
 
@@ -79,7 +79,7 @@
 
     // hero
     $('hero').className = 'card hero';
-    $('hero').innerHTML = '<div>' +
+    FootprintDOM.set($('hero'), '<div>' +
       '<div class="label">Energy · ' + esc(PERIOD[range]) + '</div>' +
       '<div class="big">' + figure(F.energy(t.wh)) + '</div>' +
       '<div class="range">Likely ' + esc(F.join(F.energy(s.energyBand.low))) + ' to ' + esc(F.join(F.energy(s.energyBand.high))) + ' · ' + esc(F.plural(t.turns, 'reply', 'replies')) + '</div>' +
@@ -87,17 +87,16 @@
       (t.wh > 0 ? '<div class="local">' + I.get('globe', 13) + '<span>' + esc(F.percent(s.perspective.share)) + ' of the electricity one person in ' + esc(s.region.inName) +
         ' uses in ' + (s.range.days === 1 ? 'a day' : s.range.days + ' days') + '</span></div>' : '') +
       trendChip(s) +
-      '</div>' + ring(s.today.wh, s.goalWh);
+      '</div>' + ring(s.today.wh, s.goalWh));
 
     // secondary figures
     var plans = Object.keys(s.planCost);
     var costMain = plans.length ? plans.map(function (c) { return F.money(s.planCost[c], c); }).join(' + ') : F.money(t.apiValueUsd, 'USD');
     var costSub = plans.length ? 'plans, ' + (range === 'today' ? 'per day' : s.range.days + ' days') : 'at API prices';
     var eq = s.equivalents;
-    $('stats').innerHTML =
-      '<div class="stat" title="Carbon based on ' + esc(s.carbon.label) + ', ' + esc(Math.round(s.carbon.kgPerKwh * 1000)) + ' g CO₂e per kWh"><span class="label">Carbon</span><span class="v">' + figure(F.carbon(t.co2g)) + '</span><span class="s">' + (t.co2g > 0 ? 'like driving ' + esc(F.distance(eq.carKm, undefined, s.region.miles)) : '—') + '</span></div>' +
+    FootprintDOM.set($('stats'), '<div class="stat" title="Carbon based on ' + esc(s.carbon.label) + ', ' + esc(Math.round(s.carbon.kgPerKwh * 1000)) + ' g CO₂e per kWh"><span class="label">Carbon</span><span class="v">' + figure(F.carbon(t.co2g)) + '</span><span class="s">' + (t.co2g > 0 ? 'like driving ' + esc(F.distance(eq.carKm, undefined, s.region.miles)) : '—') + '</span></div>' +
       '<div class="stat"><span class="label">Water</span><span class="v">' + figure(F.water(t.waterMl)) + '</span><span class="s">for cooling</span></div>' +
-      '<div class="stat"><span class="label">Cost</span><span class="v"><span class="num">' + esc(costMain) + '</span></span><span class="s">' + esc(costSub) + '</span></div>';
+      '<div class="stat"><span class="label">Cost</span><span class="v"><span class="num">' + esc(costMain) + '</span></span><span class="s">' + esc(costSub) + '</span></div>');
 
     renderChart(s);
     renderApps(s);
@@ -121,7 +120,7 @@
           '<i style="height:' + h + '%"></i></button>';
       }).join('') + '</div>' +
       '<div class="ticks"><span>' + esc(F.shortDate(days[0].date)) + '</span><span>Today</span></div>';
-    $('chart').innerHTML = html;
+    FootprintDOM.set($('chart'), html);
     var readout = $('readout');
     var last = days[days.length - 1];
     var rest = 'Today · ' + F.join(F.energy(last.totals.wh));
@@ -147,7 +146,7 @@
     if (!ids.length) { $('apps').hidden = true; return; }
     var total = ids.reduce(function (sum, id) { return sum + s.bySite[id].wh; }, 0);
     var max = s.bySite[ids[0]].wh;
-    $('apps').innerHTML = '<div class="sec-title"><h2>By app</h2><span class="label">' + esc(F.plural(ids.length, 'app', 'apps')) + '</span></div>' +
+    FootprintDOM.set($('apps'), '<div class="sec-title"><h2>By app</h2><span class="label">' + esc(F.plural(ids.length, 'app', 'apps')) + '</span></div>' +
       ids.map(function (id) {
         var v = s.bySite[id].wh;
         var share = total > 0 ? v / total : 0;
@@ -156,7 +155,7 @@
           '<span class="name">' + esc(SITE[id] ? SITE[id].name : id) + '</span>' +
           '<span class="val">' + esc(F.join(F.energy(v))) + '<small>' + shareText + '</small></span>' +
           '<div class="bar"><span style="width:' + (max > 0 ? Math.max(2, (v / max) * 100) : 0) + '%"></span></div></div>';
-      }).join('');
+      }).join(''));
   }
 
   function renderTips(s) {
@@ -167,10 +166,10 @@
       var g = GENERAL[(day + k) % GENERAL.length];
       if (covered.indexOf(g.covers) === -1) items.push({ icon: g.icon, text: g.text });
     }
-    $('tips').innerHTML = '<div class="sec-title"><h2>Lighter habits</h2></div>' + items.map(function (x) {
+    FootprintDOM.set($('tips'), '<div class="sec-title"><h2>Lighter habits</h2></div>' + items.map(function (x) {
       return '<div class="tip' + (x.personal ? ' personal' : '') + '"><span class="ic">' + I.get(x.icon, 16) + '</span><div>' +
         (x.personal ? '<span class="chip sun">From your use</span>' : '') + '<p>' + esc(x.text) + '</p></div></div>';
-    }).join('');
+    }).join(''));
   }
 
   function load() {
@@ -182,10 +181,10 @@
   }
 
   // static chrome
-  $('mark').innerHTML = I.get('mark', 22);
-  $('private').innerHTML = I.get('lock', 13) + 'Private · stays on this device';
-  $('shareLink').innerHTML = I.get('share', 15) + 'Share';
-  $('settingsLink').innerHTML = I.get('gear', 15) + 'Settings';
+  FootprintDOM.set($('mark'), I.get('mark', 22));
+  FootprintDOM.set($('private'), I.get('lock', 13) + 'Private · stays on this device');
+  FootprintDOM.set($('shareLink'), I.get('share', 15) + 'Share');
+  FootprintDOM.set($('settingsLink'), I.get('gear', 15) + 'Settings');
 
   $('rangeSeg').addEventListener('click', function (e) {
     var b = e.target.closest('button');
@@ -194,6 +193,15 @@
     this.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
     if (lastSettings) render(lastState, lastSettings);
   });
+  function checkAccess() {
+    if (!chrome.permissions || !chrome.permissions.contains) return;
+    chrome.permissions.contains({ origins: FootprintSites.origins() }, function (ok) { $('access').hidden = !!ok; });
+  }
+  $('allow').addEventListener('click', function () {
+    chrome.permissions.request({ origins: FootprintSites.origins() }, function () { checkAccess(); });
+  });
+  checkAccess();
+
   chrome.storage.onChanged.addListener(load);
   load();
 })();

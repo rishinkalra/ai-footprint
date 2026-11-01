@@ -137,9 +137,9 @@
     });
   }
 
-  $('mark').innerHTML = I.get('mark', 24);
-  $('download').innerHTML = I.get('download', 16) + 'Download image';
-  $('copy').innerHTML = I.get('copy', 16) + 'Copy image';
+  FootprintDOM.set($('mark'), I.get('mark', 24));
+  FootprintDOM.set($('download'), I.get('download', 16) + 'Download image');
+  FootprintDOM.set($('copy'), I.get('copy', 16) + 'Copy image');
   bindSeg('period', 'period');
   bindSeg('shape', 'shape');
 

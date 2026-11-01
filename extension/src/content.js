@@ -264,7 +264,7 @@
       host = document.createElement('ai-footprint-badge');
       host.style.cssText = 'position:fixed;right:16px;bottom:96px;z-index:2147483646;';
       root = host.attachShadow({ mode: 'closed' });
-      root.innerHTML = '<style>' + CSS + '</style>' +
+      FootprintDOM.set(root, '<style>' + CSS + '</style>' +
         '<div class="wrap">' +
           '<div class="card tip" role="status" aria-live="polite" hidden>' +
             '<div class="tip-head"><span class="tip-ic"></span><span class="tip-title"></span><button class="x" data-act="close" aria-label="Dismiss tip">' + icon('<path d="M6 6l12 12M18 6 6 18"/>', 15) + '</button></div>' +
@@ -277,7 +277,7 @@
             '<button class="min" data-act="min" aria-label="Minimise">' + icon('<path d="M6 12h12"/>', 15) + '</button>' +
           '</div>' +
           '<button class="dot" data-act="expand" aria-label="Show AI footprint" hidden>' + mark(18) + '</button>' +
-        '</div>';
+        '</div>');
       wrap = root.querySelector('.wrap');
       pill = root.querySelector('.pill');
       mainBtn = root.querySelector('.main');
@@ -336,21 +336,21 @@
         var goal = res.goalWh > 0;
         var over = goal && res.todayWh > res.goalWh;
         pill.classList.toggle('over', over);
-        mainBtn.innerHTML = '<span class="mark">' + mark(16) + '</span>' +
+        FootprintDOM.set(mainBtn, '<span class="mark">' + mark(16) + '</span>' +
           '<span class="reply"><b>' + esc(wh(res.replyWh)) + '</b> <span>this reply</span></span>' +
           '<span class="sep" aria-hidden="true"></span>' +
           (goal ? '<span class="meter" aria-hidden="true"><i style="width:' + Math.min(100, (res.todayWh / res.goalWh) * 100) + '%"></i></span>' : '') +
-          '<span class="today">' + esc(goal ? fmt(res.todayWh) + ' / ' + wh(res.goalWh) + ' today' : wh(res.todayWh) + ' today') + '</span>';
+          '<span class="today">' + esc(goal ? fmt(res.todayWh) + ' / ' + wh(res.goalWh) + ' today' : wh(res.todayWh) + ' today') + '</span>');
         mainBtn.setAttribute('aria-label', 'This reply ' + wh(res.replyWh) + '. Today ' + wh(res.todayWh) + (goal ? ' of ' + wh(res.goalWh) : '') + '. Open AI footprint.');
-        detail.innerHTML = '<h3>This reply</h3>' +
+        FootprintDOM.set(detail, '<h3>This reply</h3>' +
           '<div class="row"><span>Energy</span><b>' + esc(wh(res.replyWh)) + '</b></div>' +
           '<div class="row"><span>Carbon</span><b>' + esc(fmt(res.replyCo2g)) + ' g CO₂e</b></div>' +
           '<div class="row"><span>Water</span><b>' + esc(fmt(res.replyWaterMl || 0)) + ' mL</b></div>' +
-          '<div class="foot">' + esc((TIER[res.tier] || 'Model') + (res.reasoning ? ', thinking counted ×4' : '')) + '. Estimate; click for your totals.</div>';
+          '<div class="foot">' + esc((TIER[res.tier] || 'Model') + (res.reasoning ? ', thinking counted ×4' : '')) + '. Estimate; click for your totals.</div>');
         pill.hidden = !!settings.badgeMin;
         dot.hidden = !settings.badgeMin;
         if (res.tip && !settings.badgeMin) {
-          root.querySelector('.tip-ic').innerHTML = icon(ICON[res.tip.id] || ICON.goal, 16);
+          FootprintDOM.set(root.querySelector('.tip-ic'), icon(ICON[res.tip.id] || ICON.goal, 16));
           root.querySelector('.tip-title').textContent = TITLE[res.tip.id] || 'Tip';
           root.querySelector('.tip-text').textContent = res.tip.text;
           tipBox.hidden = false;

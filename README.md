@@ -61,10 +61,10 @@ Each rule has a worked example in [METHODOLOGY.md](METHODOLOGY.md), and each exa
 
 ## Quick start
 
-**Browser extension** (Chrome, Edge, Brave, Arc, Opera). Store listings are coming; until then:
+**Browser extension** for Chrome, Edge, Brave, Arc, Opera and Firefox. Store listings are coming; until then:
 1. Download or clone this repository.
-2. Open `chrome://extensions` and turn on **Developer mode**.
-3. Click **Load unpacked** and choose the `extension/` folder.
+2. **Chrome-based browsers:** open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and choose the `extension/` folder.
+3. **Firefox:** see [extension/README.md](extension/README.md#develop) to load the Firefox build.
 
 **Dashboard**
 ```bash

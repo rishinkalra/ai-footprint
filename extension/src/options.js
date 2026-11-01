@@ -24,7 +24,7 @@
   var statusTimer = null;
 
   function status(text, ok) {
-    $('status').innerHTML = (ok === false ? '' : I.get('check', 15)) + esc(text);
+    FootprintDOM.set($('status'), (ok === false ? '' : I.get('check', 15)) + esc(text));
     clearTimeout(statusTimer);
     statusTimer = setTimeout(function () { $('status').textContent = ''; }, 2500);
   }
@@ -42,8 +42,8 @@
   function renderRegion() {
     var sel = $('region');
     var det = R.info(detected);
-    sel.innerHTML = '<option value="">Automatic (' + esc(det.code === 'WORLD' ? 'not detected, world average' : det.name) + ')</option>' +
-      R.list().map(function (c) { return '<option value="' + c.code + '"' + (raw.region === c.code ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('');
+    FootprintDOM.set(sel, '<option value="">Automatic (' + esc(det.code === 'WORLD' ? 'not detected, world average' : det.name) + ')</option>' +
+      R.list().map(function (c) { return '<option value="' + c.code + '"' + (raw.region === c.code ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join(''));
     var i = R.info(currentRegion());
     $('regionNote').textContent = 'One person in ' + i.inName + ' uses about ' + F.num(i.perPersonWhDay / 1000) + ' kWh of electricity a day, all uses (' + i.demandYear + '). ' +
       'Distances in ' + (i.miles ? 'miles' : 'kilometres') + '.';
@@ -58,11 +58,11 @@
       ['world', 'World average', 'all countries · ' + world.gridYear, world.gridGPerKwh],
       ['custom', 'Custom', 'a figure from your provider', raw.carbonKgPerKwh != null ? Math.round(raw.carbonKgPerKwh * 1000) : null]
     ];
-    $('basisList').innerHTML = rows.map(function (r) {
+    FootprintDOM.set($('basisList'), rows.map(function (r) {
       return '<label class="opt"><input type="radio" name="basis" value="' + r[0] + '"' + (basis === r[0] ? ' checked' : '') + ' />' +
         '<span><b>' + esc(r[1]) + '</b><span class="sub">' + esc(r[2]) + '</span></span>' +
         '<span class="g">' + (r[3] != null ? esc(F.num(r[3])) + '<small>g/kWh</small>' : '') + '</span></label>';
-    }).join('');
+    }).join(''));
     $('customRow').hidden = basis !== 'custom';
   }
   $('region').addEventListener('change', function () {
@@ -94,7 +94,7 @@
 
   // ---- apps -----------------------------------------------------------------
   function renderSites(s) {
-    $('sites').innerHTML = FootprintSites.SITES.map(function (site) {
+    FootprintDOM.set($('sites'), FootprintSites.SITES.map(function (site) {
       var on = s.sites[site.id] !== false;
       var choices = MODEL_CHOICES[site.id];
       var current = s.models[site.id] || site.defaultModel;
@@ -105,7 +105,7 @@
       return '<div class="app' + (on ? '' : ' off') + '"><span class="mono" aria-hidden="true">' + esc(MONO[site.id]) + '</span>' +
         '<span class="name">' + esc(site.name) + '</span>' + ctl +
         '<label class="switch"><input type="checkbox" data-site="' + site.id + '"' + (on ? ' checked' : '') + ' /><span aria-hidden="true"></span><span class="sr">Measure ' + esc(site.name) + '</span></label></div>';
-    }).join('');
+    }).join(''));
   }
   $('sites').addEventListener('change', function (e) {
     var t = e.target;
@@ -133,7 +133,7 @@
   }
   function renderPlans() {
     var plans = raw.plans || [];
-    $('planList').innerHTML = plans.length ? plans.map(planRow).join('') : '<p class="empty-note">No plans added. Cost is shown at API prices instead.</p>';
+    FootprintDOM.set($('planList'), plans.length ? plans.map(planRow).join('') : '<p class="empty-note">No plans added. Cost is shown at API prices instead.</p>');
   }
   function readPlans() {
     var out = [];
@@ -218,9 +218,9 @@
   });
 
   // ---- load -------------------------------------------------------------------
-  $('mark').innerHTML = I.get('mark', 24);
-  $('addPlan').innerHTML = I.get('plus', 15) + 'Add a plan';
-  $('export').innerHTML = I.get('download', 15) + 'Export my data';
+  FootprintDOM.set($('mark'), I.get('mark', 24));
+  FootprintDOM.set($('addPlan'), I.get('plus', 15) + 'Add a plan');
+  FootprintDOM.set($('export'), I.get('download', 15) + 'Export my data');
 
   chrome.storage.local.get('settings', function (data) {
     raw = data.settings || {};
