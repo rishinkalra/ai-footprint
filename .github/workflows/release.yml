@@ -1,9 +1,16 @@
 name: Release
 
-# Push a tag like v0.2.0 to publish a GitHub Release with ready-to-install zips.
+# Publishes a GitHub Release with ready-to-install zips. Either:
+#   - Actions > Release > Run workflow, and enter a version such as v0.2.0, or
+#   - push a tag like v0.2.0, or create the release on the Releases page.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish, e.g. v0.2.0
+        required: true
 
 permissions:
   contents: write
@@ -11,6 +18,8 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,8 +35,8 @@ jobs:
           npm run build
           npx -y addons-linter dist/firefox
           cd dist
-          mv ai-footprint-chrome-*.zip "AI-Footprint-${GITHUB_REF_NAME}-Chrome-Edge-Brave.zip"
-          mv ai-footprint-firefox-*.zip "AI-Footprint-${GITHUB_REF_NAME}-Firefox.zip"
+          mv ai-footprint-chrome-*.zip "AI-Footprint-${VERSION}-Chrome-Edge-Brave.zip"
+          mv ai-footprint-firefox-*.zip "AI-Footprint-${VERSION}-Firefox.zip"
           rm -f ai-footprint-safari-*.zip
       - name: Publish
         env:
@@ -47,4 +56,10 @@ jobs:
 
           Store listings, with one-click install, are coming. Everything stays on your device; see [PRIVACY](https://github.com/${{ github.repository }}/blob/main/extension/PRIVACY.md).
           NOTES
-          gh release create "$GITHUB_REF_NAME" extension/dist/*.zip --title "AI Footprint $GITHUB_REF_NAME" --notes-file notes.md
+          # Creates the tag and release, or updates a release made on the Releases page.
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            gh release upload "$VERSION" extension/dist/*.zip --clobber
+            gh release edit "$VERSION" --notes-file notes.md
+          else
+            gh release create "$VERSION" extension/dist/*.zip --target "$GITHUB_SHA" --title "AI Footprint $VERSION" --notes-file notes.md
+          fi
