@@ -1,4 +1,4 @@
-/* global importScripts, FootprintCore, FootprintStore, FootprintSites, FootprintRegions, FootprintI18n, FootprintFormat, FootprintCompare */
+/* global importScripts, browser, FootprintCore, FootprintStore, FootprintSites, FootprintRegions, FootprintI18n, FootprintFormat, FootprintCompare */
 // Background: records turns, keeps totals in chrome.storage.local, and (only if
 // the user turns it on) syncs daily totals to their own dashboard.
 // Chrome runs this as a service worker and loads the helpers here; Firefox runs it
@@ -8,17 +8,20 @@ if (typeof importScripts === 'function' && typeof FootprintStore === 'undefined'
     'locales/en.js', 'locales/hi.js', 'locales/es.js', 'compare.js');
 }
 
+// Promise-returning API: `browser` in Firefox and Safari, `chrome` in Chrome (MV3).
+var ext = (typeof browser !== 'undefined' && browser.storage) ? browser : chrome;
+
 var SYNC_ALARM = 'ai-footprint-sync';
 var queue = Promise.resolve();
 
 // Serialise storage updates so concurrent replies can't overwrite each other.
 function withState(fn) {
   queue = queue.then(function () {
-    return chrome.storage.local.get(['state', 'settings']).then(function (data) {
+    return ext.storage.local.get(['state', 'settings']).then(function (data) {
       var state = data.state || FootprintStore.newState(crypto.randomUUID());
       var settings = FootprintStore.mergeSettings(data.settings);
       var result = fn(state, settings);
-      return chrome.storage.local.set({ state: state }).then(function () { return result; });
+      return ext.storage.local.set({ state: state }).then(function () { return result; });
     });
   });
   return queue;
@@ -44,27 +47,27 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   }
 
   if (msg.type === 'hide-badge-site') {
-    chrome.storage.local.get('settings').then(function (data) {
+    ext.storage.local.get('settings').then(function (data) {
       var s = data.settings || {};
       s.badgeHidden = s.badgeHidden || {};
       s.badgeHidden[msg.site] = true;
-      return chrome.storage.local.set({ settings: s });
+      return ext.storage.local.set({ settings: s });
     });
     return false;
   }
 
   if (msg.type === 'badge-min') {
-    chrome.storage.local.get('settings').then(function (data) {
+    ext.storage.local.get('settings').then(function (data) {
       var s = data.settings || {};
       s.badgeMin = s.badgeMin || {};
       s.badgeMin[msg.site] = !!msg.value;
-      return chrome.storage.local.set({ settings: s });
+      return ext.storage.local.set({ settings: s });
     });
     return false;
   }
 
   if (msg.type === 'open-popup') {
-    var open = chrome.action.openPopup ? chrome.action.openPopup() : Promise.reject();
+    var open = ext.action && ext.action.openPopup ? ext.action.openPopup() : Promise.reject();
     Promise.resolve(open).catch(function () {
       chrome.tabs.create({ url: chrome.runtime.getURL('src/popup.html?tab=1') });
     });
@@ -122,7 +125,7 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
 });
 
 function syncNow() {
-  return chrome.storage.local.get(['state', 'settings']).then(function (data) {
+  return ext.storage.local.get(['state', 'settings']).then(function (data) {
     var settings = FootprintStore.mergeSettings(data.settings);
     var state = data.state;
     if (!state || !settings.sync.enabled || !settings.sync.url) return { ok: false, error: 'Sync is off' };
