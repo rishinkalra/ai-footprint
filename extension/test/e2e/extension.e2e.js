@@ -106,10 +106,11 @@ const reply = Array.from({ length: 60 }, (_, i) => 'word' + i).join(' ');
     // 4) Popup renders the totals.
     const popup = await context.newPage();
     await popup.goto(`chrome-extension://${extId}/src/popup.html`);
-    await popup.waitForSelector('.hero .big');
+    await popup.waitForSelector('.hero .headline');
     const text = await popup.textContent('main');
     assert.match(text, /ChatGPT/);
     assert.match(text, /Claude/);
+    assert.equal(await popup.isHidden('#access'), true, 'Chrome has site access, so no Allow banner');
     await popup.screenshot({ path: path.join(os.tmpdir(), 'fp-popup.png') });
     await p2.screenshot({ path: path.join(os.tmpdir(), 'fp-badge.png') });
 

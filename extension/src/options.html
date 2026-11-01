@@ -12,97 +12,101 @@
     <aside class="side">
       <a class="logo" href="welcome.html"><span class="mark" id="mark"></span>AI Footprint</a>
       <nav aria-label="Settings sections">
-        <a href="#goal">Daily goal</a>
-        <a href="#country">Country and carbon</a>
-        <a href="#apps">Apps</a>
-        <a href="#plans">Plans and cost</a>
-        <a href="#advanced">Advanced</a>
-        <a href="#data">Your data</a>
-        <a href="#method">How we estimate</a>
+        <a href="#goal" data-i18n="o_nav_goal">Daily goal</a>
+        <a href="#country" data-i18n="o_nav_country"></a>
+        <a href="#apps" data-i18n="o_nav_apps">Apps</a>
+        <a href="#plans" data-i18n="o_nav_plans">Plans and cost</a>
+        <a href="#advanced" data-i18n="o_nav_advanced">Advanced</a>
+        <a href="#data" data-i18n="o_nav_data">Your data</a>
+        <a href="#method" data-i18n="o_nav_method">How we estimate</a>
       </nav>
       <p class="status" id="status" role="status" aria-live="polite"></p>
     </aside>
 
     <main class="content">
       <header class="head">
-        <h1>Settings</h1>
-        <p class="muted">Changes save as you make them.</p>
+        <h1 data-i18n="o_title">Settings</h1>
+        <p class="muted" data-i18n="o_saves">Changes save as you make them.</p>
       </header>
 
       <section class="card sec" id="goal">
-        <div class="sec-head"><h2>Daily goal</h2><p>You'll see progress next to each reply, and one reminder the day you pass it.</p></div>
+        <div class="sec-head"><h2 data-i18n="o_nav_goal">Daily goal</h2><p data-i18n="o_goal_p"></p></div>
         <div class="goal-row">
-          <div class="goal-val"><span class="num" id="goalNum">25</span><span class="unit">Wh a day</span></div>
+          <div class="goal-val"><span class="num" id="goalNum">25</span><span class="unit" data-i18n="w_goal_unit">Wh a day</span></div>
           <div class="goal-ctl">
-            <label class="sr" for="dailyGoalWh">Daily goal in watt-hours</label>
+            <label class="sr" for="dailyGoalWh" data-i18n="w_goal_aria">Daily goal in watt-hours</label>
             <input type="range" id="dailyGoalWh" min="0" max="100" step="5" />
             <p class="muted small" id="goalEq"></p>
           </div>
         </div>
         <div class="row">
-          <div><b>Badge on AI sites</b><p class="muted small">Shows each reply's energy next to the chat.</p></div>
+          <div><b>Badge on AI sites</b><p class="muted small" data-i18n="o_badge_p"></p></div>
           <label class="switch"><input type="checkbox" id="showBadge" /><span aria-hidden="true"></span><span class="sr">Show the badge</span></label>
         </div>
       </section>
 
       <section class="card sec" id="country">
-        <div class="sec-head"><h2>Country and carbon</h2><p>Your country sets the comparisons you see (electricity per person, miles or kilometres). Carbon depends on where the AI actually runs, which you can choose below.</p></div>
+        <div class="sec-head"><h2 data-i18n="o_country_h"></h2><p data-i18n="o_country_p"></p></div>
         <div class="field">
-          <label for="region">Country</label>
+          <label for="language" data-i18n="o_language">Language</label>
+          <select id="language"></select>
+        </div>
+        <div class="field">
+          <label for="region" data-i18n="o_country">Country</label>
           <select id="region"></select>
           <p class="muted small" id="regionNote"></p>
         </div>
         <fieldset class="basis">
-          <legend>Carbon is based on</legend>
+          <legend data-i18n="o_basis">Carbon is based on</legend>
           <div id="basisList"></div>
           <div class="custom" id="customRow">
-            <label for="carbonKgPerKwh">Custom figure, kg CO₂e per kWh</label>
+            <label for="carbonKgPerKwh" data-i18n="o_custom_label">Custom figure, kg CO₂e per kWh</label>
             <input type="number" id="carbonKgPerKwh" min="0" max="2" step="0.001" placeholder="0.384" />
           </div>
         </fieldset>
-        <p class="muted small">Grid figures are lifecycle emissions from Ember's yearly electricity data. Most chat AI runs in large US data centres, so that is the default. Choose your country's grid if your AI apps serve you from local data centres.</p>
+        <p class="muted small" data-i18n="o_basis_note"></p>
       </section>
 
       <section class="card sec" id="apps">
-        <div class="sec-head"><h2>Apps</h2><p>Turn measuring on or off per app. When an app doesn't say which model answered, pick the one you usually use so the estimate uses the right size.</p></div>
+        <div class="sec-head"><h2 data-i18n="o_nav_apps">Apps</h2><p data-i18n="o_apps_p"></p></div>
         <div class="apps" id="sites"></div>
       </section>
 
       <section class="card sec" id="plans">
-        <div class="sec-head"><h2>Plans and cost</h2><p>Add what you pay for AI, in any currency. It's spread over each day so you can see cost next to energy.</p></div>
+        <div class="sec-head"><h2 data-i18n="o_nav_plans">Plans and cost</h2><p data-i18n="o_plans_p"></p></div>
         <div class="plans" id="planList"></div>
         <button type="button" class="btn" id="addPlan"></button>
       </section>
 
       <section class="card sec" id="advanced">
-        <div class="sec-head"><h2>Advanced</h2></div>
+        <div class="sec-head"><h2 data-i18n="o_nav_advanced">Advanced</h2></div>
         <details>
-          <summary>Sync to a dashboard</summary>
+          <summary data-i18n="o_sync_h">Sync to a dashboard</summary>
           <div class="inner">
-            <p class="muted small">Send daily totals (counts only, never text) to your own or your team's AI Footprint dashboard. Off unless you turn it on.</p>
-            <label for="syncUrl">Dashboard address</label>
+            <p class="muted small" data-i18n="o_sync_p"></p>
+            <label for="syncUrl" data-i18n="o_sync_url">Dashboard address</label>
             <input type="url" id="syncUrl" placeholder="https://footprint.example.com" />
-            <label for="syncKey">Ingest key</label>
+            <label for="syncKey" data-i18n="o_sync_key">Ingest key</label>
             <input type="password" id="syncKey" autocomplete="off" />
             <div class="row tight">
-              <span>Sync daily totals</span>
-              <label class="switch"><input type="checkbox" id="syncEnabled" /><span aria-hidden="true"></span><span class="sr">Sync daily totals</span></label>
+              <span data-i18n="o_sync_toggle">Sync daily totals</span>
+              <label class="switch"><input type="checkbox" id="syncEnabled" /><span aria-hidden="true"></span><span class="sr" data-i18n="o_sync_toggle">Sync daily totals</span></label>
             </div>
-            <div><button type="button" class="btn" id="syncNow">Sync now</button> <span class="muted small" id="syncStatus"></span></div>
+            <div><button type="button" class="btn" id="syncNow" data-i18n="o_sync_now">Sync now</button> <span class="muted small" id="syncStatus"></span></div>
           </div>
         </details>
       </section>
 
       <section class="card sec" id="data">
-        <div class="sec-head"><h2>Your data</h2><p>Everything stays in this browser. The extension measures how long messages are; it never keeps what you type or what the AI says.</p></div>
+        <div class="sec-head"><h2 data-i18n="o_nav_data">Your data</h2><p data-i18n="o_data_p">Everything stays in this browser. The extension measures how long messages are; it never keeps what you type or what the AI says.</p></div>
         <div class="actions">
           <button type="button" class="btn" id="export"></button>
-          <button type="button" class="btn danger" id="wipe">Delete all recorded data</button>
+          <button type="button" class="btn danger" id="wipe" data-i18n="o_wipe">Delete all recorded data</button>
         </div>
       </section>
 
-      <section class="card sec method" id="method">
-        <div class="sec-head"><h2>How we estimate</h2><p>AI companies don't publish per-message energy, so these are careful estimates. We show a likely range of 0.4× to 3× around each figure.</p></div>
+      <section class="card sec method" id="method" lang="en">
+        <div class="sec-head"><h2 data-i18n="o_method_h">How we estimate</h2><p class="muted small" data-i18n="o_method_lang"></p><p>AI companies don't publish per-message energy, so these are careful estimates. We show a likely range of 0.4× to 3× around each figure.</p></div>
         <ol class="steps">
           <li><b>Tokens.</b> In English about 4 characters make one token. Each reply is charged for the conversation before it, because chat apps re-read it every time.</li>
           <li><b>Energy per token</b> depends on model size, in Wh per 1,000 tokens read and written:
@@ -133,6 +137,11 @@
   <script src="regions.js"></script>
   <script src="store.js"></script>
   <script src="format.js"></script>
+  <script src="i18n.js"></script>
+  <script src="locales/en.js"></script>
+  <script src="locales/hi.js"></script>
+  <script src="locales/es.js"></script>
+  <script src="compare.js"></script>
   <script src="dom.js"></script>
   <script src="icons.js"></script>
   <script src="options.js"></script>

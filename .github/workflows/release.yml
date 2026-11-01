@@ -1,0 +1,50 @@
+name: Release
+
+# Push a tag like v0.2.0 to publish a GitHub Release with ready-to-install zips.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test
+        run: |
+          (cd dashboard && npm ci && npm test)
+          (cd extension && npm test)
+      - name: Build
+        working-directory: extension
+        run: |
+          npm run build
+          npx -y addons-linter dist/firefox
+          cd dist
+          mv ai-footprint-chrome-*.zip "AI-Footprint-${GITHUB_REF_NAME}-Chrome-Edge-Brave.zip"
+          mv ai-footprint-firefox-*.zip "AI-Footprint-${GITHUB_REF_NAME}-Firefox.zip"
+          rm -f ai-footprint-safari-*.zip
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'NOTES'
+          ## Install
+
+          **Chrome, Edge, Brave, Arc, Opera, Vivaldi**
+          1. Download **AI-Footprint-…-Chrome-Edge-Brave.zip** below and unzip it.
+          2. Open `chrome://extensions` (Edge: `edge://extensions`) and turn on **Developer mode**.
+          3. Click **Load unpacked** and choose the unzipped folder.
+
+          **Firefox:** download **AI-Footprint-…-Firefox.zip**, then open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…** and choose the zip.
+
+          **Safari (Mac):** see the Safari section of [extension/README.md](https://github.com/${{ github.repository }}/blob/main/extension/README.md#develop).
+
+          Store listings, with one-click install, are coming. Everything stays on your device; see [PRIVACY](https://github.com/${{ github.repository }}/blob/main/extension/PRIVACY.md).
+          NOTES
+          gh release create "$GITHUB_REF_NAME" extension/dist/*.zip --title "AI Footprint $GITHUB_REF_NAME" --notes-file notes.md

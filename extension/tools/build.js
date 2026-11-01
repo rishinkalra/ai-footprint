@@ -19,7 +19,8 @@ const FILES = ['manifest.json', 'src', 'icons', 'fonts', '_locales', 'PRIVACY.md
 const FIREFOX_ID = 'ai-footprint@rishinkalra.github.io';
 
 // Scripts the background loads, in order. background.js imports the same list in Chrome.
-const BACKGROUND = ['core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js', 'background.js'];
+const BACKGROUND = ['core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js', 'format.js', 'i18n.js',
+  'locales/en.js', 'locales/hi.js', 'locales/es.js', 'compare.js', 'background.js'];
 
 function chromeManifest() {
   return JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));

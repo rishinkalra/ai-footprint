@@ -26,17 +26,17 @@
       <a class="logo" href="welcome.html"><span class="mark" id="mark"></span>AI Footprint</a>
     </div>
     <div>
-      <h1>Share your AI footprint</h1>
-      <p class="lede">A card with your totals and trend. It never includes anything you wrote or the AI said.</p>
+      <h1 data-i18n="s_title">Share your AI footprint</h1>
+      <p class="lede" data-i18n="s_lede">A card with your totals and trend. It never includes anything you wrote or the AI said.</p>
     </div>
     <div class="controls">
-      <div class="seg" role="group" aria-label="Period" id="period">
-        <button type="button" data-v="7d">7 days</button>
-        <button type="button" data-v="30d" aria-pressed="true">30 days</button>
+      <div class="seg" role="group" aria-label="Period" data-i18n-label="aria_period" id="period">
+        <button type="button" data-v="7d" data-i18n="range_7d">7 days</button>
+        <button type="button" data-v="30d" aria-pressed="true" data-i18n="range_30d">30 days</button>
       </div>
-      <div class="seg" role="group" aria-label="Shape" id="shape">
-        <button type="button" data-v="wide" aria-pressed="true">Wide · 1200×630</button>
-        <button type="button" data-v="square">Square · 1080×1080</button>
+      <div class="seg" role="group" aria-label="Shape" data-i18n-label="s_shape" id="shape">
+        <button type="button" data-v="wide" aria-pressed="true" data-i18n="s_wide">Wide · 1200×630</button>
+        <button type="button" data-v="square" data-i18n="s_square">Square · 1080×1080</button>
       </div>
     </div>
     <div class="stage"><canvas id="card" role="img" aria-label="Your AI footprint card"></canvas></div>
@@ -45,7 +45,7 @@
       <button type="button" class="btn" id="copy"></button>
       <span class="done" id="done" role="status"></span>
     </div>
-    <p class="note">Figures are estimates with a likely range of 0.4× to 3×.</p>
+    <p class="note" data-i18n="s_note">Figures are estimates with a likely range of 0.4× to 3×.</p>
   </div>
   <script src="core.js"></script>
   <script src="sites.js"></script>
@@ -53,6 +53,11 @@
   <script src="regions.js"></script>
   <script src="store.js"></script>
   <script src="format.js"></script>
+  <script src="i18n.js"></script>
+  <script src="locales/en.js"></script>
+  <script src="locales/hi.js"></script>
+  <script src="locales/es.js"></script>
+  <script src="compare.js"></script>
   <script src="dom.js"></script>
   <script src="icons.js"></script>
   <script src="share.js"></script>

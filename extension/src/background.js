@@ -1,10 +1,11 @@
-/* global importScripts, FootprintCore, FootprintStore, FootprintSites, FootprintRegions */
+/* global importScripts, FootprintCore, FootprintStore, FootprintSites, FootprintRegions, FootprintI18n, FootprintFormat, FootprintCompare */
 // Background: records turns, keeps totals in chrome.storage.local, and (only if
 // the user turns it on) syncs daily totals to their own dashboard.
 // Chrome runs this as a service worker and loads the helpers here; Firefox runs it
 // as an event page whose manifest loads them first (see tools/build.js).
 if (typeof importScripts === 'function' && typeof FootprintStore === 'undefined') {
-  importScripts('core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js');
+  importScripts('core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js', 'format.js', 'i18n.js',
+    'locales/en.js', 'locales/hi.js', 'locales/es.js', 'compare.js');
 }
 
 var SYNC_ALARM = 'ai-footprint-sync';
@@ -33,6 +34,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     withState(function (state, settings) {
       var env = { region: FootprintRegions.detect(navigator.languages, Intl.DateTimeFormat().resolvedOptions().timeZone) };
       var res = FootprintStore.recordTurn(state, msg, settings, Date.now(), env);
+      res.ui = badgeText(res, settings, settings.region || env.region);
       if (settings.sync && settings.sync.enabled && settings.sync.url) {
         chrome.alarms.create(SYNC_ALARM, { delayInMinutes: 1 });
       }
@@ -75,6 +77,45 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   }
   return false;
 });
+
+// Everything the in-page badge shows, in the user's language and with local comparisons.
+var TIP_TITLE = { 'long-thread': 'tip_title_long', 'reasoning-short': 'tip_title_reasoning', image: 'tip_title_image', goal: 'tip_title_goal' };
+function badgeText(res, settings, region) {
+  var I = FootprintI18n, F = FootprintFormat, C = FootprintCompare;
+  I.setLocale(settings.language, navigator.languages);
+  var loc = I.locale();
+  var t = I.t;
+  var wh = function (v) { return F.join(F.energy(v, loc)); };
+  var headline = C.energy(res.replyWh, region).text;
+  var goal = res.goalWh > 0;
+  var tip = null;
+  if (res.tip) {
+    var params = Object.assign({}, res.tip.params);
+    if (res.tip.id === 'goal') params.wh = wh(res.tip.params.goalWh);
+    tip = { id: res.tip.id, title: t(TIP_TITLE[res.tip.id] || 'tip_title_goal'), text: t(res.tip.key, params) };
+  }
+  return {
+    lang: loc,
+    headline: headline,
+    replyWh: wh(res.replyWh),
+    goalShare: goal ? Math.min(1, res.todayWh / res.goalWh) : null,
+    goalText: goal ? t('badge_goal', { pct: F.percent(res.todayWh / res.goalWh, loc) }) : t('badge_today', { wh: wh(res.todayWh) }),
+    aria: t('badge_aria', { cmp: headline, wh: wh(res.replyWh) }),
+    minimise: t('badge_minimise'),
+    expand: t('badge_expand'),
+    dismiss: t('badge_dismiss'),
+    hideSite: t('tip_hide_site'),
+    ok: t('tip_ok'),
+    detailTitle: t('detail_title'),
+    detailRows: [
+      [t('detail_energy'), wh(res.replyWh)],
+      [t('detail_carbon'), F.join(F.carbon(res.replyCo2g, loc))],
+      [t('detail_water'), C.water(res.replyWaterMl)]
+    ],
+    detailFoot: t('size_' + (res.tier || 'medium')) + (res.reasoning ? ', ' + t('detail_thinking') : '') + '. ' + t('detail_note'),
+    tip: tip
+  };
+}
 
 chrome.alarms.onAlarm.addListener(function (alarm) {
   if (alarm.name === SYNC_ALARM) syncNow().catch(function () { /* retried on next reply */ });

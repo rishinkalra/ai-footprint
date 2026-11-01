@@ -84,7 +84,7 @@ async function main() {
   for (const scheme of ['light', 'dark']) {
     for (const r of ['7d', '30d', 'today']) {
       const p = await open('popup.html', { scheme, height: 560 });
-      await p.waitForSelector('.hero .big');
+      await p.waitForSelector('.hero .headline');
       if (r !== '7d') await p.click(`#rangeSeg [data-range="${r}"]`);
       await shot(`popup-${r}-${scheme}`, p);
       await p.close();

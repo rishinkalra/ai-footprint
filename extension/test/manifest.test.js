@@ -18,9 +18,10 @@ test('store listing limits', () => {
   assert.ok(messages.extDescription.message.length <= 132);
 });
 
-test('asks for no broad permissions up front', () => {
-  assert.deepEqual(manifest.permissions.sort(), ['alarms', 'storage']);
-  assert.equal(manifest.host_permissions, undefined);
+test('asks only for storage, alarms and the eight AI sites', () => {
+  assert.deepEqual(manifest.permissions.slice().sort(), ['alarms', 'storage']);
+  assert.deepEqual(manifest.host_permissions.slice().sort(), manifest.content_scripts[0].matches.slice().sort());
+  assert.ok(!manifest.host_permissions.some(p => p.includes('*://*') || p === '<all_urls>'));
 });
 
 test('every referenced file exists', () => {

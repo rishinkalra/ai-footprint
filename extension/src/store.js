@@ -22,6 +22,7 @@
     showBadge: true,
     sites: {},            // { siteId: false } turns a site off
     models: {},           // { siteId: 'claude-opus' } when the page doesn't say
+    language: null,       // 'en' | 'hi' | 'es' ...; null = the browser's language
     region: null,         // ISO country code; null = detect from the browser
     carbonBasis: null,    // 'datacentre' (default) | 'local' | 'world' | 'custom'
     carbonKgPerKwh: null, // used when carbonBasis is 'custom'
@@ -122,8 +123,7 @@
     });
     var todayWh = dayTotals(state, date).wh;
     if (!tip && settings.dailyGoalWh > 0 && todayWh >= settings.dailyGoalWh && state.goalNotified !== date) {
-      tip = { id: 'goal', text: 'You have reached your daily AI energy goal of ' + settings.dailyGoalWh +
-        ' Wh. Worth asking: does this next prompt need AI?' };
+      tip = { id: 'goal', key: 'tip_goal', params: { goalWh: settings.dailyGoalWh } };
       state.goalNotified = date;
     }
     if (tip && tip.id !== 'goal') thread.tips[tip.id] = true;
