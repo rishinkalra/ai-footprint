@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI footprint</title>
+  <link rel="stylesheet" href="widget.css" />
+</head>
+<body>
+  <main class="fp" id="fp">
+    <header class="fp-head">
+      <div>
+        <h1>AI footprint</h1>
+        <p class="muted" id="subtitle">Money, energy, carbon and water behind our AI work</p>
+      </div>
+      <div class="fp-controls">
+        <div class="seg" role="group" aria-label="Date range" id="rangeSeg">
+          <button data-range="today">Today</button>
+          <button data-range="7d" aria-pressed="true">7 days</button>
+          <button data-range="30d">30 days</button>
+          <button data-range="mtd">This month</button>
+          <button data-range="all">All</button>
+        </div>
+        <button class="ghost" id="refreshBtn" title="Re-read logs and provider reports">Refresh</button>
+        <a class="ghost full-link" id="fullLink" href="/ai-footprint/" target="_top">Open full view</a>
+      </div>
+    </header>
+
+    <section class="tiles" id="tiles" aria-live="polite"></section>
+
+    <section class="panel full-only" id="dailyPanel">
+      <div class="panel-head">
+        <h2 id="dailyTitle">Energy per day</h2>
+        <div class="seg small" role="group" aria-label="Daily metric" id="dailySeg">
+          <button data-metric="energy" aria-pressed="true">Energy</button>
+          <button data-metric="spend">Spend</button>
+          <button data-metric="co2">CO₂e</button>
+        </div>
+      </div>
+      <div class="daily" id="daily"></div>
+      <details class="table-toggle"><summary>Show as table</summary><div id="dailyTable"></div></details>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>By platform</h2>
+        <div class="seg small" role="group" aria-label="Platform metric" id="platformSeg">
+          <button data-metric="energy" aria-pressed="true">Energy</button>
+          <button data-metric="spend">Spend</button>
+          <button data-metric="value">List-price value</button>
+          <button data-metric="tokens">Tokens</button>
+        </div>
+      </div>
+      <div id="platforms" class="hbars"></div>
+    </section>
+
+    <section class="panel full-only">
+      <div class="panel-head"><h2>By model</h2></div>
+      <div id="models"></div>
+    </section>
+
+    <section class="panel full-only">
+      <div class="panel-head"><h2>Where the numbers come from</h2></div>
+      <ul id="sources" class="sources"></ul>
+      <p class="muted fine" id="assumptions"></p>
+    </section>
+
+    <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+  </main>
+  <script src="widget.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "timezone": "Europe/Berlin",
+  "currency": { "secondary": { "code": "INR", "symbol": "₹", "perUsd": 88 } },
+
+  "subscriptions": [
+    { "name": "Claude Max", "platform": "claude-code", "monthlyUsd": 100, "since": "2026-01-01" },
+    { "name": "ChatGPT Plus", "platform": "chatgpt", "monthlyUsd": 20, "since": "2026-01-01" },
+    { "name": "Google AI Pro", "platform": "gemini", "monthlyUsd": 20 }
+  ],
+
+  "sources": {
+    "claudeCode": { "billing": "subscription" },
+    "openclaw": { "billing": "api" },
+    "codex": { "enabled": false }
+  },
+
+  "carbon": { "defaultKgPerKwh": 0.40, "byProvider": {} },
+  "pricing": {
+    "my-custom-model": { "input": 1, "output": 4, "tier": "medium" }
+  }
+}

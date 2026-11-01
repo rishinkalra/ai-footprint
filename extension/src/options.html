@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI footprint settings</title>
+  <link rel="stylesheet" href="ui.css" />
+  <style>
+    main { max-width: 760px; margin: 0 auto; padding: 28px 20px 60px; display: grid; gap: 16px; }
+    h1 { font-size: 1.5rem; }
+    .card h2 { margin-bottom: 12px; }
+    label { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    label.stack { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 8px 16px; }
+    .grid label { justify-content: space-between; }
+    .grid label span.name { flex: 1; }
+    .plan { display: grid; grid-template-columns: 1fr 120px 90px auto; gap: 8px; margin-bottom: 8px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .note { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+    #status { color: var(--good); font-size: 13px; }
+    table { border-collapse: collapse; font-size: 13px; width: 100%; }
+    td, th { border-bottom: 1px solid var(--border); padding: 6px; text-align: left; }
+    p { margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div>
+      <h1>⚡ AI footprint</h1>
+      <p class="muted">See the energy, carbon, water and money behind your AI use, and get small nudges toward lighter habits.</p>
+    </div>
+
+    <section class="card">
+      <h2>Your goal</h2>
+      <label class="stack">Daily AI energy goal (Wh)
+        <input type="number" id="dailyGoalWh" min="0" step="1" style="width:120px" />
+      </label>
+      <p class="note">25 Wh is about 80 typical chat replies. Set 0 to turn the goal off. You get one gentle reminder the first time you pass it each day.</p>
+      <label><input type="checkbox" id="showBadge" /> Show the footprint badge on AI sites</label>
+    </section>
+
+    <section class="card">
+      <h2>Apps to measure</h2>
+      <div class="grid" id="sites"></div>
+      <p class="note">If a site doesn't say which model answered, pick the closest one so the estimate uses the right size. ChatGPT reports its model automatically.</p>
+    </section>
+
+    <section class="card">
+      <h2>Your AI plans (optional)</h2>
+      <div id="plans"></div>
+      <div class="actions"><button class="secondary" id="addPlan">Add a plan</button></div>
+      <p class="note">For example "ChatGPT Plus, 20, USD" or "Gemini, 1950, INR". Plan cost is spread over each day and shown in your own currency.</p>
+    </section>
+
+    <section class="card">
+      <h2>Carbon intensity (optional)</h2>
+      <label class="stack">kg CO₂e per kWh
+        <input type="number" id="carbonKgPerKwh" min="0" max="2" step="0.01" placeholder="0.40" style="width:120px" />
+      </label>
+      <p class="note">This is about the data centres' electricity, not yours. The default is 0.40, a typical grid average where big AI data centres run. Change it only if you have a better figure for your provider.</p>
+    </section>
+
+    <section class="card">
+      <h2>Sync to a dashboard (optional, off by default)</h2>
+      <p>Send daily totals (counts only, never text) to your own or your team's AI footprint dashboard.</p>
+      <label class="stack">Dashboard address
+        <input type="url" id="syncUrl" placeholder="https://your-dashboard.example.com" style="width:100%" />
+      </label>
+      <label class="stack">Ingest key
+        <input type="password" id="syncKey" autocomplete="off" style="width:100%" />
+      </label>
+      <label><input type="checkbox" id="syncEnabled" /> Sync daily totals</label>
+      <div class="actions"><button class="secondary" id="syncNow">Sync now</button><span id="syncStatus" class="muted"></span></div>
+    </section>
+
+    <div class="actions">
+      <button class="primary" id="save">Save settings</button>
+      <span id="status" role="status"></span>
+    </div>
+
+    <section class="card">
+      <h2>Your data</h2>
+      <p>Everything is stored only in this browser. The extension never reads or keeps what you type or what the AI says. It only measures how long each message is.</p>
+      <div class="actions">
+        <button class="secondary" id="export">Export my data (JSON)</button>
+        <button class="danger" id="wipe">Delete all data</button>
+      </div>
+    </section>
+
+    <section class="card" id="method">
+      <h2>How we estimate</h2>
+      <p>AI companies don't publish per-message energy, so these are careful estimates, shown with a likely range.</p>
+      <ol>
+        <li><b>Tokens.</b> About 4 characters of text are 1 token. Each reply is charged for the whole conversation so far, because chat apps re-read it every time.</li>
+        <li><b>Energy per token</b> depends on model size:
+          <table>
+            <tr><th>Size</th><th>Examples</th><th>Wh per 1,000 tokens read / written</th></tr>
+            <tr><td>Small</td><td>Gemini Flash, GPT mini, Claude Haiku</td><td>0.01 / 0.10</td></tr>
+            <tr><td>Medium</td><td>GPT-5, GPT-4o, Claude Sonnet, Gemini Pro</td><td>0.05 / 0.50</td></tr>
+            <tr><td>Large</td><td>Claude Opus</td><td>0.12 / 1.50</td></tr>
+            <tr><td>Extra large</td><td>Deep research, Claude Fable</td><td>0.25 / 3.00</td></tr>
+          </table>
+          A typical medium-model reply comes to about 0.3 Wh. That is in line with the figures Google (0.24 Wh per Gemini prompt) and OpenAI (0.34 Wh per ChatGPT query) published in 2025.</li>
+        <li><b>Thinking models</b> write hidden reasoning before replying, so we count their output 4×.</li>
+        <li><b>Images:</b> about 2.9 Wh per generated image (Luccioni et al., 2023).</li>
+        <li><b>Carbon</b> = energy × grid intensity. <b>Water</b> = energy × 1.1 L/kWh of data-centre cooling.</li>
+      </ol>
+      <p class="muted">Not included: training the models, building the hardware, or your own device. The real figure could be roughly 0.4× to 3× our central estimate.</p>
+    </section>
+  </main>
+  <script src="core.js"></script>
+  <script src="sites.js"></script>
+  <script src="store.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

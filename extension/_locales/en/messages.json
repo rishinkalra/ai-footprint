@@ -1,0 +1,8 @@
+{
+  "extName": {
+    "message": "AI Footprint: energy, carbon & cost of your AI chats"
+  },
+  "extDescription": {
+    "message": "Estimated energy, CO₂, water and cost behind your ChatGPT, Claude, Gemini and Copilot replies. Private: stays in your browser."
+  }
+}

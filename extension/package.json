@@ -1,0 +1,15 @@
+{
+  "name": "ai-footprint-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser extension: estimated energy, carbon, water and cost of AI chat replies",
+  "scripts": {
+    "test": "node --test 'test/*.test.js'",
+    "test:e2e": "node test/e2e/extension.e2e.js",
+    "build": "rm -rf dist && mkdir -p dist && zip -qr dist/ai-footprint-extension-$npm_package_version.zip manifest.json src icons _locales PRIVACY.md && echo dist/ai-footprint-extension-$npm_package_version.zip"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "playwright": "^1.50.0"
+  }
+}
