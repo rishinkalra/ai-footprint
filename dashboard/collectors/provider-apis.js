@@ -49,6 +49,7 @@ async function fetchAnthropicUsage({ key, days = 90, fetchImpl = fetch }) {
           outputTokens: r.output_tokens || 0,
           cacheReadTokens: r.cache_read_input_tokens || 0,
           cacheWriteTokens: (cc.ephemeral_5m_input_tokens || 0) + (cc.ephemeral_1h_input_tokens || 0),
+          cacheWrite1hTokens: cc.ephemeral_1h_input_tokens || 0,
           reportedCostUsd: null, source: 'api:anthropic'
         });
       }

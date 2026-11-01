@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Share your AI footprint</title>
+  <link rel="stylesheet" href="theme.css" />
+  <style>
+    .page { max-width: 1040px; margin: 0 auto; padding: 24px 24px 64px; display: grid; gap: 22px; }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .logo .mark { color: var(--moss); display: inline-flex; }
+    h1 { font-size: var(--t-2xl); }
+    .lede { color: var(--ink-2); max-width: 40em; margin-top: 6px; }
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .stage { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; display: grid; place-items: center; }
+    canvas { width: 100%; max-width: 900px; height: auto; border-radius: 14px; box-shadow: var(--shadow); }
+    canvas.square { max-width: 520px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .note { font-size: var(--t-sm); color: var(--muted); }
+    .done { color: var(--moss); font-weight: 600; font-size: var(--t-sm); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="top">
+      <a class="logo" href="welcome.html"><span class="mark" id="mark"></span>AI Footprint</a>
+    </div>
+    <div>
+      <h1>Share your AI footprint</h1>
+      <p class="lede">A card with your totals and trend. It never includes anything you wrote or the AI said.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Period" id="period">
+        <button type="button" data-v="7d">7 days</button>
+        <button type="button" data-v="30d" aria-pressed="true">30 days</button>
+      </div>
+      <div class="seg" role="group" aria-label="Shape" id="shape">
+        <button type="button" data-v="wide" aria-pressed="true">Wide · 1200×630</button>
+        <button type="button" data-v="square">Square · 1080×1080</button>
+      </div>
+    </div>
+    <div class="stage"><canvas id="card" role="img" aria-label="Your AI footprint card"></canvas></div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="download"></button>
+      <button type="button" class="btn" id="copy"></button>
+      <span class="done" id="done" role="status"></span>
+    </div>
+    <p class="note">Figures are estimates with a likely range of 0.4× to 3×.</p>
+  </div>
+  <script src="core.js"></script>
+  <script src="sites.js"></script>
+  <script src="regions-data.js"></script>
+  <script src="regions.js"></script>
+  <script src="store.js"></script>
+  <script src="format.js"></script>
+  <script src="icons.js"></script>
+  <script src="share.js"></script>
+</body>
+</html>

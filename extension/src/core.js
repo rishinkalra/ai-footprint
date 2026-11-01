@@ -39,8 +39,15 @@
   // Generated image: ~2.9 Wh (Luccioni et al. 2023, "Power Hungry Processing").
   var IMAGE_WH = 2.9;
 
+  // Re-reading text the provider already has in its prompt cache skips most of the
+  // compute. Providers keep a conversation cached for about 5 minutes of inactivity.
+  var CACHE_READ_FACTOR = 0.1;
+  var CACHE_TTL_MS = 5 * 60 * 1000;
+
   var DEFAULTS = {
-    carbonKgPerKwh: 0.40,
+    // Ember 2025 lifecycle grid intensity of the US, where most chat AI runs.
+    // Pages pass the user's chosen basis (see regions.js); this is the fallback.
+    carbonKgPerKwh: 0.384,
     waterLitresPerKwh: 1.1,
     uncertainty: { low: 0.4, high: 3.0 },
     charsPerToken: 4,
@@ -74,35 +81,46 @@
     return Math.round((chars || 0) / (o.charsPerToken || 4));
   }
 
-  // turn: { model, tier?, inputTokens, outputTokens, images }
+  // turn: { model, tier?, inputTokens, cachedTokens?, outputTokens, images }
+  //   inputTokens   everything the model read for this reply (prompt + conversation so far)
+  //   cachedTokens  the part of inputTokens served from the provider's prompt cache
+  //   outputTokens  the visible reply; thinking models add hidden reasoning on top
+  //
+  // energy (Wh) = (fresh input + cached × 0.1) / 1000 × input Wh per 1k
+  //             + output × reasoning multiplier / 1000 × output Wh per 1k
+  //             + images × 2.9
   function assessTurn(turn, settings) {
     var s = settings || {};
     var tier = turn.tier || tierFor(turn.model);
     var t = TIERS[tier] || TIERS.medium;
     var reasoning = turn.reasoning != null ? turn.reasoning : isReasoning(turn.model);
     var input = Math.min(turn.inputTokens || 0, DEFAULTS.maxContextTokens);
+    var cached = Math.min(input, Math.max(0, turn.cachedTokens || 0));
+    var effectiveInput = (input - cached) + cached * CACHE_READ_FACTOR;
     var output = (turn.outputTokens || 0) * (reasoning ? REASONING_OUTPUT_MULTIPLIER : 1);
-    var wh = (input / 1000) * t.inputWhPer1k + (output / 1000) * t.outputWhPer1k + (turn.images || 0) * IMAGE_WH;
+    var wh = (effectiveInput / 1000) * t.inputWhPer1k + (output / 1000) * t.outputWhPer1k + (turn.images || 0) * IMAGE_WH;
     var price = TIER_PRICES[tier] || TIER_PRICES.medium;
     var kgPerKwh = s.carbonKgPerKwh != null ? s.carbonKgPerKwh : DEFAULTS.carbonKgPerKwh;
     return {
       tier: tier,
       reasoning: reasoning,
       inputTokens: input,
+      cachedTokens: cached,
       outputTokens: output,
       wh: wh,
       co2g: wh * kgPerKwh,                     // kg/kWh == g/Wh
       waterMl: wh * DEFAULTS.waterLitresPerKwh,  // L/kWh == mL/Wh
-      apiValueUsd: (input * price.input + output * price.output) / 1e6
+      apiValueUsd: ((input - cached) * price.input + cached * price.input * CACHE_READ_FACTOR + output * price.output) / 1e6
     };
   }
 
-  // How much less energy the next reply would use in a fresh chat.
+  // How much less energy the next reply would use in a fresh chat, compared with
+  // this reply as it actually ran (cached or not).
   function freshChatSaving(turn) {
     var now = assessTurn(turn).wh;
     var fresh = assessTurn({
       model: turn.model, tier: turn.tier, reasoning: turn.reasoning,
-      inputTokens: DEFAULTS.freshChatTokens, outputTokens: turn.outputTokens, images: 0
+      inputTokens: DEFAULTS.freshChatTokens, cachedTokens: 0, outputTokens: turn.outputTokens, images: 0
     }).wh;
     return { nowWh: now, freshWh: fresh, factor: fresh > 0 ? now / fresh : 1 };
   }
@@ -139,7 +157,7 @@
   }
 
   function emptyTotals() {
-    return { turns: 0, inputTokens: 0, outputTokens: 0, images: 0, wh: 0, co2g: 0, waterMl: 0, apiValueUsd: 0, longThreadWh: 0, reasoningWh: 0 };
+    return { turns: 0, inputTokens: 0, cachedTokens: 0, outputTokens: 0, images: 0, wh: 0, co2g: 0, waterMl: 0, apiValueUsd: 0, longThreadWh: 0, reasoningWh: 0 };
   }
 
   function addTotals(a, b) {
@@ -166,20 +184,22 @@
       out.push({ id: 'reasoning', share: reasonShare,
         text: Math.round(reasonShare * 100) + '% came from thinking models. Save them for hard problems.' });
     }
-    if (totals.images > 0) {
-      out.push({ id: 'images', share: (totals.images * IMAGE_WH) / totals.wh,
+    var imageShare = (totals.images * IMAGE_WH) / totals.wh;
+    if (totals.images > 0 && imageShare >= 0.05) {
+      out.push({ id: 'images', share: imageShare,
         text: totals.images + ' generated image' + (totals.images === 1 ? '' : 's') + ' used about ' +
           Math.round(((totals.images * IMAGE_WH) / totals.wh) * 100) + '% of your AI energy.' });
     }
     return out;
   }
 
-  function equivalents(totals) {
+  // carGPerKm: the local typical car (see regions.js); defaults to 170 g/km.
+  function equivalents(totals, carGPerKm) {
     return {
       phoneCharges: totals.wh / EQUIVALENTS.phoneChargeWh,
       ledBulbHours: totals.wh / EQUIVALENTS.ledBulbW,
       googleSearches: totals.wh / EQUIVALENTS.googleSearchWh,
-      carKm: totals.co2g / EQUIVALENTS.carGCo2PerKm,
+      carKm: totals.co2g / (carGPerKm || EQUIVALENTS.carGCo2PerKm),
       glassesOfWater: totals.waterMl / EQUIVALENTS.glassOfWaterMl
     };
   }
@@ -198,6 +218,7 @@
 
   return {
     TIERS: TIERS, TIER_PRICES: TIER_PRICES, DEFAULTS: DEFAULTS, EQUIVALENTS: EQUIVALENTS,
+    CACHE_READ_FACTOR: CACHE_READ_FACTOR, CACHE_TTL_MS: CACHE_TTL_MS,
     IMAGE_WH: IMAGE_WH, REASONING_OUTPUT_MULTIPLIER: REASONING_OUTPUT_MULTIPLIER,
     tierFor: tierFor, isReasoning: isReasoning, tokensFromChars: tokensFromChars,
     assessTurn: assessTurn, freshChatSaving: freshChatSaving, tipForTurn: tipForTurn,

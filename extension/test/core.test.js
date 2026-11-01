@@ -8,6 +8,7 @@ test('energy tiers match the dashboard so both tell the same story', () => {
   assert.equal(core.DEFAULTS.carbonKgPerKwh, dashboard.carbon.defaultKgPerKwh);
   assert.equal(core.DEFAULTS.waterLitresPerKwh, dashboard.water.defaultLitresPerKwh);
   assert.deepEqual(core.DEFAULTS.uncertainty, dashboard.energy.uncertainty);
+  assert.equal(core.CACHE_READ_FACTOR, dashboard.energy.cacheReadFactor);
 });
 
 test('model names map to sizes', () => {
@@ -32,7 +33,7 @@ test('thinking models are detected', () => {
 test('typical medium reply is ~0.3 Wh', () => {
   const a = core.assessTurn({ model: 'gpt-5', inputTokens: 1000, outputTokens: 500 });
   assert.ok(a.wh > 0.25 && a.wh < 0.35, String(a.wh));
-  assert.ok(Math.abs(a.co2g - a.wh * 0.4) < 1e-12);
+  assert.ok(Math.abs(a.co2g - a.wh * 0.384) < 1e-12);
   assert.ok(Math.abs(a.waterMl - a.wh * 1.1) < 1e-12);
 });
 
@@ -54,6 +55,28 @@ test('custom carbon intensity is honoured', () => {
   assert.ok(Math.abs(a.co2g - a.wh * 0.1) < 1e-12);
 });
 
+test('worked example: long chat reply, cached and uncached (see METHODOLOGY.md)', () => {
+  // Medium model, 40,000 tokens of conversation, 400-token reply.
+  // Uncached: 40000/1000 × 0.05 + 400/1000 × 0.5 = 2.0 + 0.2 = 2.2 Wh
+  const cold = core.assessTurn({ model: 'gpt-5', inputTokens: 40000, cachedTokens: 0, outputTokens: 400 });
+  assert.ok(Math.abs(cold.wh - 2.2) < 1e-12, String(cold.wh));
+  // 38,000 of those cached: (2000 + 38000 × 0.1)/1000 × 0.05 + 0.2 = 0.29 + 0.2 = 0.49 Wh
+  const warm = core.assessTurn({ model: 'gpt-5', inputTokens: 40000, cachedTokens: 38000, outputTokens: 400 });
+  assert.ok(Math.abs(warm.wh - 0.49) < 1e-12, String(warm.wh));
+  // Carbon at the default 0.384 g/Wh; water at 1.1 mL/Wh
+  assert.ok(Math.abs(warm.co2g - 0.49 * 0.384) < 1e-12);
+  assert.ok(Math.abs(warm.waterMl - 0.49 * 1.1) < 1e-12);
+  // Value at medium-tier API prices ($3 in, $0.30 cached, $15 out per MTok):
+  //   2000×3 + 38000×0.3 + 400×15 = 6000 + 11400 + 6000 = 23,400 → $0.0234
+  assert.ok(Math.abs(warm.apiValueUsd - 0.0234) < 1e-12, String(warm.apiValueUsd));
+});
+
+test('cached tokens can never exceed the input', () => {
+  const a = core.assessTurn({ model: 'gpt-5', inputTokens: 1000, cachedTokens: 5000, outputTokens: 0 });
+  assert.equal(a.cachedTokens, 1000);
+  assert.ok(Math.abs(a.wh - 0.005) < 1e-12);
+});
+
 test('long chats get a fresh-chat nudge with a real saving', () => {
   const turn = { model: 'gpt-5', inputTokens: 40000, outputTokens: 400 };
   const tip = core.tipForTurn(turn, {});
@@ -62,6 +85,10 @@ test('long chats get a fresh-chat nudge with a real saving', () => {
   const saving = core.freshChatSaving(turn);
   assert.ok(saving.factor > 4, String(saving.factor));
   assert.equal(core.tipForTurn(turn, { longThreadTipShown: true }), null);
+  // When the chat is warm in the cache the saving is small, so no tip.
+  const warm = { model: 'gpt-5', inputTokens: 40000, cachedTokens: 39000, outputTokens: 400 };
+  assert.ok(core.freshChatSaving(warm).factor < 1.5);
+  assert.equal(core.tipForTurn(warm, {}), null);
 });
 
 test('short prompts on thinking models get a nudge', () => {
@@ -73,6 +100,7 @@ test('short prompts on thinking models get a nudge', () => {
 test('insights point at the biggest habits', () => {
   const ins = core.insights({ wh: 100, longThreadWh: 50, reasoningWh: 40, images: 2 });
   assert.deepEqual(ins.map(i => i.id), ['long-threads', 'reasoning', 'images']);
+  assert.ok(!core.insights({ wh: 1000, images: 1 }).some(i => i.id === 'images'), 'tiny image share is not worth a tip');
   assert.equal(core.insights({ wh: 0 }).length, 0);
 });
 

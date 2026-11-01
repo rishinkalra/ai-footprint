@@ -1,7 +1,7 @@
-/* global importScripts, FootprintCore, FootprintStore, FootprintSites */
+/* global importScripts, FootprintCore, FootprintStore, FootprintSites, FootprintRegions */
 // Service worker: records turns, keeps totals in chrome.storage.local, and
 // (only if the user turns it on) syncs daily totals to their own dashboard.
-importScripts('core.js', 'sites.js', 'store.js');
+importScripts('core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js');
 
 var SYNC_ALARM = 'ai-footprint-sync';
 var queue = Promise.resolve();
@@ -27,7 +27,8 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     var site = from ? FootprintSites.siteForHost(new URL(from).hostname) : null;
     if (!site || site.id !== msg.site) { sendResponse(null); return false; }
     withState(function (state, settings) {
-      var res = FootprintStore.recordTurn(state, msg, settings, Date.now());
+      var env = { region: FootprintRegions.detect(navigator.languages, Intl.DateTimeFormat().resolvedOptions().timeZone) };
+      var res = FootprintStore.recordTurn(state, msg, settings, Date.now(), env);
       if (settings.sync && settings.sync.enabled && settings.sync.url) {
         chrome.alarms.create(SYNC_ALARM, { delayInMinutes: 1 });
       }
@@ -41,6 +42,16 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       var s = data.settings || {};
       s.badgeHidden = s.badgeHidden || {};
       s.badgeHidden[msg.site] = true;
+      return chrome.storage.local.set({ settings: s });
+    });
+    return false;
+  }
+
+  if (msg.type === 'badge-min') {
+    chrome.storage.local.get('settings').then(function (data) {
+      var s = data.settings || {};
+      s.badgeMin = s.badgeMin || {};
+      s.badgeMin[msg.site] = !!msg.value;
       return chrome.storage.local.set({ settings: s });
     });
     return false;
@@ -92,5 +103,5 @@ function syncNow() {
 }
 
 chrome.runtime.onInstalled.addListener(function (details) {
-  if (details.reason === 'install') chrome.runtime.openOptionsPage();
+  if (details.reason === 'install') chrome.tabs.create({ url: chrome.runtime.getURL('src/welcome.html') });
 });

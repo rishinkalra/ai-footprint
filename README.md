@@ -37,6 +37,8 @@ npx ai-footprint import ~/Downloads/conversations.json   # ChatGPT or Claude.ai 
 ## What a number means
 A typical AI chat reply uses about **0.3 Wh**, roughly what a laptop uses in a few seconds. That sounds small, but it adds up. Long chats, thinking models, generated images and agentic coding can each cost 10–1000× more. These estimates have wide error bars, so we always show a likely range (0.4× to 3×).
 
+Numbers are put in local perspective. The same 10 Wh is 2% of a day's electricity for one person in Nigeria, and 0.02% in Canada. So the extension compares your AI use with electricity use where you live, uses miles or kilometres as people do there, and lets you choose whose grid the carbon figure is based on. Every formula has a worked example in [METHODOLOGY.md](METHODOLOGY.md).
+
 ## Contributing
 Bug reports, site fixes, translations and better data are all welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Please also read our [Code of Conduct](CODE_OF_CONDUCT.md) and [Security policy](SECURITY.md).
 

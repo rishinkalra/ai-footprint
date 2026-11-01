@@ -133,7 +133,10 @@ test('ChatGPT and Claude.ai exports import idempotently', () => {
   const ev = out.events[0];
   assert.equal(ev.requests, 2);
   assert.equal(ev.outputTokens, 300);
-  assert.equal(ev.inputTokens, 100 + 400, 'second reply is charged the whole conversation so far');
+  // Reply 1 reads the 100-token prompt. Reply 2, 20 s later, reads 100 + 200 + 100 = 400
+  // tokens, of which the first 300 (prompt + reply 1) are still in the prompt cache.
+  assert.equal(ev.inputTokens, 100 + 100, 'fresh input: first prompt, then only the new prompt');
+  assert.equal(ev.cacheReadTokens, 300, 'the earlier conversation is read from cache');
   assert.equal(ev.id, `import:chatgpt:${ev.date}:gpt-5`);
 
   const claude = [{ chat_messages: [

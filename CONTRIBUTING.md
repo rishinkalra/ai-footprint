@@ -14,6 +14,9 @@ To fix one:
 
 Adding a new site works the same way: add an entry to `sites.js`, then regenerate the manifest matches (a test checks they agree).
 
+## Country data
+`extension/src/regions-data.js` (grid carbon intensity and electricity use per person, by country) is generated from Ember data. To refresh it, follow the commands at the top of `extension/tools/build-regions.py`. Don't edit it by hand.
+
 ## Tests
 ```bash
 cd dashboard && npm install && npm test

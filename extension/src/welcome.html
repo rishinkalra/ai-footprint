@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Welcome to AI Footprint</title>
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="welcome.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="topbar"><span class="logo"><span class="mark" id="mark"></span>AI Footprint</span></header>
+
+    <section class="hero">
+      <div class="copy">
+        <h1>See the footprint of your AI chats</h1>
+        <p class="lede">Every AI reply uses electricity in a data centre. AI Footprint estimates the energy, carbon, water and cost of each one, right where you chat, and suggests small habits that make a difference.</p>
+        <div class="sites" id="sites" aria-label="Works on"></div>
+      </div>
+      <div class="preview" aria-hidden="true">
+        <div class="pv-chat">
+          <div class="pv-u">Summarise this report in five points</div>
+          <div class="pv-a"><i></i><i></i><i></i><i class="short"></i></div>
+        </div>
+        <div class="pv-tip card">
+          <div class="pv-tip-head"><span class="pv-ic" id="pvIcon"></span><b>Long chat</b></div>
+          <p>Each reply re-reads about 25k tokens. A new chat with a short summary would use about 10× less energy per reply.</p>
+        </div>
+        <div class="pv-pill"><span class="mark" id="pvMark"></span><b>0.31&nbsp;Wh</b><span class="m">this reply</span><span class="sep"></span><span class="meter"><i></i></span><span class="m">9.6 / 25&nbsp;Wh today</span></div>
+        <span class="pv-cap">Example</span>
+      </div>
+    </section>
+
+    <section class="card goal" aria-labelledby="goalTitle">
+      <div class="goal-copy">
+        <h2 id="goalTitle">Choose a daily goal</h2>
+        <p>A gentle limit, not a rule. You'll see progress next to each reply and get one reminder the day you pass it. You can change it any time.</p>
+      </div>
+      <div class="goal-ctl">
+        <div class="goal-val"><span class="num" id="goalNum">25</span><span class="unit">Wh a day</span></div>
+        <p class="goal-eq" id="goalEq"></p>
+        <label class="sr" for="goal">Daily goal in watt-hours</label>
+        <input type="range" id="goal" min="5" max="100" step="5" value="25" />
+        <div class="presets" role="group" aria-label="Presets">
+          <button type="button" class="btn" data-goal="10">Light · 10</button>
+          <button type="button" class="btn" data-goal="25">Typical · 25</button>
+          <button type="button" class="btn" data-goal="50">Heavy · 50</button>
+        </div>
+        <div class="cta">
+          <button type="button" class="btn primary" id="start">Save and start</button>
+          <span class="saved" id="saved" role="status"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="promise" aria-label="Privacy">
+      <div class="p"><span class="ic" id="ic1"></span><h3>Counts, never content</h3><p>It measures how long messages are. What you type and what the AI says is never stored.</p></div>
+      <div class="p"><span class="ic" id="ic2"></span><h3>Stays on this device</h3><p>Your totals live in this browser. Nothing is sent anywhere unless you turn on sync.</p></div>
+      <div class="p"><span class="ic" id="ic3"></span><h3>Open and checkable</h3><p>The code and every number behind the estimates are public. <a href="options.html#method">How we estimate</a></p></div>
+    </section>
+
+    <section class="next" id="next" hidden>
+      <h2>You're set</h2>
+      <p>Open your AI app and chat as usual. The badge appears after the first reply. Click the leaf in your toolbar any time to see your totals.</p>
+      <div class="links" id="links"></div>
+    </section>
+  </div>
+  <script src="core.js"></script>
+  <script src="sites.js"></script>
+  <script src="regions-data.js"></script>
+  <script src="regions.js"></script>
+  <script src="store.js"></script>
+  <script src="format.js"></script>
+  <script src="icons.js"></script>
+  <script src="welcome.js"></script>
+</body>
+</html>

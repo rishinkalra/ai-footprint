@@ -16,8 +16,10 @@ It is built for anyone, anywhere. It is private by design: no account, no server
 ## How it measures
 
 1. The content script watches replies **while they are being written**. History that loads already complete is never counted, so re-opening old chats adds nothing.
-2. When a reply stops changing, it records character counts only: the reply, the prompt, and the whole conversation before it (chat apps re-read it on every turn). About 4 characters make 1 token.
-3. The background worker turns tokens into energy by model size. These are the same figures the dashboard uses, and a test keeps them in sync. Thinking models count their output 4× for hidden reasoning, and each generated image adds 2.9 Wh. Carbon and water are calculated from the energy.
+2. When a reply stops changing, it estimates tokens for the reply, the prompt and the conversation before it, which chat apps re-read on every turn. The estimate depends on the writing system, because Hindi, Arabic or Chinese use more tokens per character than English. Only counts are kept, never text.
+3. A follow-up within 5 minutes reads the earlier conversation from the provider's prompt cache, at a tenth of the compute.
+4. The background worker turns tokens into energy by model size. These are the same figures the dashboard uses, and a test keeps them in sync. Thinking models count their output 4× for hidden reasoning, and each generated image adds 2.9 Wh. Carbon follows the grid you choose (default: the US grid, where most AI runs), and water is calculated from energy.
+5. Results are put in local perspective: a share of the electricity one person in your country uses, plus miles or kilometres and your locale's number format.
 
 The full method and its sources are on the settings page and in [METHODOLOGY.md](../METHODOLOGY.md). A typical reply is about 0.3 Wh. The likely range is 0.4× to 3× that, because providers don't publish per-message figures.
 
@@ -40,6 +42,8 @@ npm test              # unit tests (core, storage, manifest); run `npm install` 
 npm install && npx playwright install chromium
 npm run test:e2e      # real Chromium: loads the extension, streams fake ChatGPT/Claude replies
 npm run build         # dist/ai-footprint-extension-<version>.zip for the stores
+npm run render        # store/screens and store/listing: every screen with demo data
+node store/render.js popup --locale=en-IN   # one screen as a browser in another country
 ```
 
 Load unpacked: open `chrome://extensions`, turn on Developer mode, click **Load unpacked**, and pick this folder.

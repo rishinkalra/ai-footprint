@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test 'test/*.test.js'",
     "test:e2e": "node test/e2e/extension.e2e.js",
-    "build": "rm -rf dist && mkdir -p dist && zip -qr dist/ai-footprint-extension-$npm_package_version.zip manifest.json src icons _locales PRIVACY.md && echo dist/ai-footprint-extension-$npm_package_version.zip"
+    "build": "rm -rf dist && mkdir -p dist && zip -qr dist/ai-footprint-extension-$npm_package_version.zip manifest.json src icons fonts _locales PRIVACY.md && echo dist/ai-footprint-extension-$npm_package_version.zip",
+    "render": "node store/render.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {
