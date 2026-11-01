@@ -125,33 +125,21 @@
     return { nowWh: now, freshWh: fresh, factor: fresh > 0 ? now / fresh : 1 };
   }
 
-  // In-page nudge for a single reply, or null.
+  // In-page nudge for a single reply, or null: { id, key, params }. Pages turn
+  // key + params into text in the user's language (src/locales).
   function tipForTurn(turn, context) {
     var c = context || {};
     if (turn.inputTokens >= DEFAULTS.longThreadTokens && !c.longThreadTipShown) {
       var s = freshChatSaving(turn);
       if (s.factor >= 1.5) {
-        return {
-          id: 'long-thread',
-          text: 'This chat is long: each reply re-reads about ' + Math.round(turn.inputTokens / 1000) +
-            'k tokens. Starting a new chat with a short summary would use about ' +
-            Math.round(s.factor) + '× less energy per reply.'
-        };
+        return { id: 'long-thread', key: 'tip_long', params: { k: Math.round(turn.inputTokens / 1000), x: Math.round(s.factor) } };
       }
     }
     if (isReasoning(turn.model) && (turn.promptTokens || 0) < 60 && !c.reasoningTipShown) {
-      return {
-        id: 'reasoning-short',
-        text: 'Thinking models write hidden reasoning before answering, often several times the visible reply. ' +
-          'For quick questions a standard model is enough.'
-      };
+      return { id: 'reasoning-short', key: 'tip_reasoning', params: {} };
     }
     if ((turn.images || 0) > 0 && !c.imageTipShown) {
-      return {
-        id: 'image',
-        text: 'Generating one image uses roughly as much energy as ' + Math.round(IMAGE_WH / 0.3) +
-          ' text replies. Describe what you want precisely to avoid re-rolls.'
-      };
+      return { id: 'image', key: 'tip_image', params: { n: Math.round(IMAGE_WH / 0.3) } };
     }
     return null;
   }
@@ -170,25 +158,18 @@
     return { low: value * DEFAULTS.uncertainty.low, mid: value, high: value * DEFAULTS.uncertainty.high };
   }
 
-  // Habit-level suggestions from a period's totals.
+  // Habit-level suggestions from a period's totals: [{ id, key, share, params }].
+  // params.pct is a whole percentage; pages format it for the user's language.
   function insights(totals) {
     var out = [];
     if (!totals || totals.wh <= 0) return out;
     var longShare = totals.longThreadWh / totals.wh;
     var reasonShare = totals.reasoningWh / totals.wh;
-    if (longShare >= 0.3) {
-      out.push({ id: 'long-threads', share: longShare,
-        text: Math.round(longShare * 100) + '% of your AI energy went on replies in very long chats. Start fresh chats more often.' });
-    }
-    if (reasonShare >= 0.3) {
-      out.push({ id: 'reasoning', share: reasonShare,
-        text: Math.round(reasonShare * 100) + '% came from thinking models. Save them for hard problems.' });
-    }
     var imageShare = (totals.images * IMAGE_WH) / totals.wh;
+    if (longShare >= 0.3) out.push({ id: 'long-threads', key: 'insight_long', share: longShare, params: { pct: Math.round(longShare * 100) } });
+    if (reasonShare >= 0.3) out.push({ id: 'reasoning', key: 'insight_reasoning', share: reasonShare, params: { pct: Math.round(reasonShare * 100) } });
     if (totals.images > 0 && imageShare >= 0.05) {
-      out.push({ id: 'images', share: imageShare,
-        text: totals.images + ' generated image' + (totals.images === 1 ? '' : 's') + ' used about ' +
-          Math.round(((totals.images * IMAGE_WH) / totals.wh) * 100) + '% of your AI energy.' });
+      out.push({ id: 'images', key: 'insight_images', share: imageShare, params: { count: totals.images, n: totals.images, pct: Math.round(imageShare * 100) } });
     }
     return out;
   }

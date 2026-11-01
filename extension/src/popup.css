@@ -8,8 +8,9 @@ body.tab .pop { max-width: 400px; margin: 24px auto; }
 
 /* hero: the period's energy, with today's goal ring alongside */
 .hero { padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
-.hero .big { font-size: var(--t-3xl); line-height: 1; margin: 6px 0 6px; }
-.hero .big .unit { font-size: var(--t-lg); margin-left: 4px; }
+.hero .headline { font: 650 21px/1.18 var(--font-display); letter-spacing: -0.015em; color: var(--ink); margin: 6px 0 8px; text-wrap: balance; }
+.hero .meta { font-size: var(--t-sm); color: var(--ink-2); font-weight: 600; }
+.hero .range { margin-top: 2px; }
 .hero .range { font-size: var(--t-xs); color: var(--muted); }
 .hero .compare { font-size: var(--t-sm); color: var(--ink-2); margin-top: 8px; }
 .hero .local { display: flex; gap: 6px; align-items: flex-start; font-size: var(--t-xs); color: var(--muted); margin-top: 6px; line-height: 1.4; }
@@ -22,7 +23,7 @@ body.tab .pop { max-width: 400px; margin: 24px auto; }
 .ring.over .arc { stroke: var(--sun); }
 .ring .in { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
 .ring .in .num { font-size: var(--t-lg); line-height: 1.1; }
-.ring .in .label { font-size: 11px; }
+.ring .in .label { font-size: 10.5px; line-height: 1.2; max-width: 62px; margin: 0 auto; }
 .ring-cap { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; max-width: 92px; }
 .ring-cap.over { color: var(--sun); font-weight: 600; }
 

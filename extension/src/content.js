@@ -186,8 +186,6 @@
       image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
       goal: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>'
     };
-    var TITLE = { 'long-thread': 'Long chat', 'reasoning-short': 'Thinking model', image: 'Image generation', goal: 'Daily goal reached' };
-    var TIER = { small: 'Small model', medium: 'Medium model', large: 'Large model', xlarge: 'Extra-large model' };
 
     function icon(body, size) {
       return '<svg aria-hidden="true" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + body + '</svg>';
@@ -233,7 +231,7 @@
       '.pill{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:999px;box-shadow:var(--shadow);overflow:hidden}' +
       '.main{display:flex;align-items:center;gap:8px;padding:7px 6px 7px 11px;white-space:nowrap}' +
       '.mark{color:var(--moss);display:inline-flex}' +
-      '.reply b{font-weight:700;color:var(--ink)}.reply span{color:var(--muted)}' +
+      '.reply b{font-weight:650;color:var(--ink)}.reply span{color:var(--muted);font-size:12px}' +
       '.sep{width:1px;height:16px;background:var(--line)}' +
       '.meter{width:38px;height:6px;border-radius:999px;background:var(--track);overflow:hidden;display:inline-block}' +
       '.meter i{display:block;height:100%;background:var(--moss);border-radius:999px}' +
@@ -332,27 +330,32 @@
       update: function (res) {
         ensure();
         lastRes = res;
+        var ui = res.ui || {};
         wrap.setAttribute('data-theme', pageIsDark() ? 'dark' : 'light');
-        var goal = res.goalWh > 0;
-        var over = goal && res.todayWh > res.goalWh;
-        pill.classList.toggle('over', over);
+        if (ui.lang) wrap.setAttribute('lang', ui.lang);
+        var goal = ui.goalShare != null;
+        pill.classList.toggle('over', goal && res.todayWh > res.goalWh);
+        // Lead with the everyday comparison; the number is secondary.
         FootprintDOM.set(mainBtn, '<span class="mark">' + mark(16) + '</span>' +
-          '<span class="reply"><b>' + esc(wh(res.replyWh)) + '</b> <span>this reply</span></span>' +
+          '<span class="reply"><b>' + esc(ui.headline || wh(res.replyWh)) + '</b> <span>' + esc(ui.replyWh || '') + '</span></span>' +
           '<span class="sep" aria-hidden="true"></span>' +
-          (goal ? '<span class="meter" aria-hidden="true"><i style="width:' + Math.min(100, (res.todayWh / res.goalWh) * 100) + '%"></i></span>' : '') +
-          '<span class="today">' + esc(goal ? fmt(res.todayWh) + ' / ' + wh(res.goalWh) + ' today' : wh(res.todayWh) + ' today') + '</span>');
-        mainBtn.setAttribute('aria-label', 'This reply ' + wh(res.replyWh) + '. Today ' + wh(res.todayWh) + (goal ? ' of ' + wh(res.goalWh) : '') + '. Open AI footprint.');
-        FootprintDOM.set(detail, '<h3>This reply</h3>' +
-          '<div class="row"><span>Energy</span><b>' + esc(wh(res.replyWh)) + '</b></div>' +
-          '<div class="row"><span>Carbon</span><b>' + esc(fmt(res.replyCo2g)) + ' g CO₂e</b></div>' +
-          '<div class="row"><span>Water</span><b>' + esc(fmt(res.replyWaterMl || 0)) + ' mL</b></div>' +
-          '<div class="foot">' + esc((TIER[res.tier] || 'Model') + (res.reasoning ? ', thinking counted ×4' : '')) + '. Estimate; click for your totals.</div>');
+          (goal ? '<span class="meter" aria-hidden="true"><i style="width:' + (ui.goalShare * 100) + '%"></i></span>' : '') +
+          '<span class="today">' + esc(ui.goalText || '') + '</span>');
+        mainBtn.setAttribute('aria-label', ui.aria || '');
+        root.querySelector('.min').setAttribute('aria-label', ui.minimise || 'Minimise');
+        dot.setAttribute('aria-label', ui.expand || 'Show AI Footprint');
+        root.querySelector('.x').setAttribute('aria-label', ui.dismiss || 'Dismiss');
+        root.querySelector('[data-act="hide-site"]').textContent = ui.hideSite || 'Hide on this site';
+        root.querySelector('.tip-actions .primary').textContent = ui.ok || 'OK';
+        FootprintDOM.set(detail, '<h3>' + esc(ui.detailTitle || '') + '</h3>' +
+          (ui.detailRows || []).map(function (r) { return '<div class="row"><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; }).join('') +
+          '<div class="foot">' + esc(ui.detailFoot || '') + '</div>');
         pill.hidden = !!settings.badgeMin;
         dot.hidden = !settings.badgeMin;
-        if (res.tip && !settings.badgeMin) {
-          FootprintDOM.set(root.querySelector('.tip-ic'), icon(ICON[res.tip.id] || ICON.goal, 16));
-          root.querySelector('.tip-title').textContent = TITLE[res.tip.id] || 'Tip';
-          root.querySelector('.tip-text').textContent = res.tip.text;
+        if (ui.tip && !settings.badgeMin) {
+          FootprintDOM.set(root.querySelector('.tip-ic'), icon(ICON[ui.tip.id] || ICON.goal, 16));
+          root.querySelector('.tip-title').textContent = ui.tip.title;
+          root.querySelector('.tip-text').textContent = ui.tip.text;
           tipBox.hidden = false;
         }
       }

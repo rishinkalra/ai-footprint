@@ -55,7 +55,14 @@ node store/render.js popup --locale=en-IN   # one screen as a browser in another
 
 **Firefox:** run `npm run build`, or download the `ai-footprint-firefox` zip from the latest CI run and unzip it. Then open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…**, and pick `manifest.json` inside `dist/firefox` (or the unzipped folder). Firefox removes temporary add-ons when it restarts. For a lasting install before the public listing, sign it as an unlisted add-on on addons.mozilla.org, which is free. If Firefox shows "Allow on AI sites" in the welcome page or popup, click it; Firefox can ask for site access separately.
 
-`npm run build` writes `dist/chrome/` and `dist/firefox/`, plus a store zip for each. The Firefox version uses the same files with a different manifest: an event page instead of a service worker, an add-on ID, and a "collects no data" declaration (`tools/build.js`). `npm run lint:firefox` runs Mozilla's add-on validator.
+**Safari (Mac):** you need macOS with Safari 17+, Xcode (free from the Mac App Store; open it once) and Node.js 20+. Run `bash tools/install-safari.sh` from this folder. It builds the Safari version, converts it into a small Mac app with Apple's converter, installs it to `~/Applications` and opens it. Then, in Safari Settings:
+1. **Advanced:** tick "Show features for web developers".
+2. **Developer:** tick "Allow unsigned extensions". Safari turns this off again each time it quits.
+3. **Extensions:** tick "AI Footprint".
+
+No Apple developer account is needed for your own Mac. Publishing to the Mac App Store needs one ($99/year).
+
+`npm run build` writes `dist/chrome/`, `dist/firefox/` and `dist/safari/`, plus a zip for each. The Firefox version uses the same files with a different manifest: an event page instead of a service worker, an add-on ID, and a "collects no data" declaration (`tools/build.js`). `npm run lint:firefox` runs Mozilla's add-on validator.
 
 Site markup changes over time. Each site's selectors live in `src/sites.js` with fallbacks, and the e2e test runs against fake pages that use the same markup.
 

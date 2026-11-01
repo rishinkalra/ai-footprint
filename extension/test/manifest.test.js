@@ -18,9 +18,10 @@ test('store listing limits', () => {
   assert.ok(messages.extDescription.message.length <= 132);
 });
 
-test('asks for no broad permissions up front', () => {
-  assert.deepEqual(manifest.permissions.sort(), ['alarms', 'storage']);
-  assert.equal(manifest.host_permissions, undefined);
+test('asks only for storage, alarms and the eight AI sites', () => {
+  assert.deepEqual(manifest.permissions.slice().sort(), ['alarms', 'storage']);
+  assert.deepEqual(manifest.host_permissions.slice().sort(), manifest.content_scripts[0].matches.slice().sort());
+  assert.ok(!manifest.host_permissions.some(p => p.includes('*://*') || p === '<all_urls>'));
 });
 
 test('every referenced file exists', () => {
@@ -61,4 +62,14 @@ test('background.js loads the same helpers as the Firefox manifest lists', () =>
 
 test('site access patterns cover every supported site', () => {
   assert.deepEqual(sites.origins().sort(), manifest.content_scripts[0].matches.slice().sort());
+});
+
+test('Safari build: non-persistent background page, otherwise identical', () => {
+  const { safariManifest, chromeManifest, BACKGROUND } = require('../tools/build');
+  const sf = safariManifest();
+  assert.deepEqual(sf.background, { scripts: BACKGROUND.map(f => 'src/' + f) });
+  const ch = chromeManifest();
+  assert.deepEqual(sf.content_scripts, ch.content_scripts);
+  assert.deepEqual(sf.permissions, ch.permissions);
+  assert.equal(sf.browser_specific_settings, undefined);
 });

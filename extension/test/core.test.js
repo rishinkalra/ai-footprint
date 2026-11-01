@@ -81,7 +81,8 @@ test('long chats get a fresh-chat nudge with a real saving', () => {
   const turn = { model: 'gpt-5', inputTokens: 40000, outputTokens: 400 };
   const tip = core.tipForTurn(turn, {});
   assert.equal(tip.id, 'long-thread');
-  assert.match(tip.text, /40k tokens/);
+  assert.equal(tip.key, 'tip_long');
+  assert.equal(tip.params.k, 40);
   const saving = core.freshChatSaving(turn);
   assert.ok(saving.factor > 4, String(saving.factor));
   assert.equal(core.tipForTurn(turn, { longThreadTipShown: true }), null);

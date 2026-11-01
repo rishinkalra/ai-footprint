@@ -47,6 +47,8 @@ Both use the same [open methodology](METHODOLOGY.md); tests keep their figures i
 - uses miles or kilometres as people do there;
 - lets you choose whose grid the carbon figure is based on.
 
+**In plain words, in your language.** The badge and popup lead with something familiar. In India that's "Like a ceiling fan running for 1.6 hours", in the US "Like running a microwave for 6 minutes", in the UK "Like boiling water for 4.8 cups of tea". The number sits underneath. Every screen is in English, Hindi and Spanish, and more languages are welcome.
+
 **Correct formulas.** The estimates account for:
 - prompt caching in follow-ups;
 - languages that need more tokens per character;
@@ -62,9 +64,9 @@ Each rule has a worked example in [METHODOLOGY.md](METHODOLOGY.md), and each exa
 ## Quick start
 
 **Browser extension** for Chrome, Edge, Brave, Arc, Opera and Firefox. Store listings are coming; until then:
-1. Download or clone this repository.
-2. **Chrome-based browsers:** open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and choose the `extension/` folder.
-3. **Firefox:** see [extension/README.md](extension/README.md#develop) to load the Firefox build.
+1. Download the latest zip from **[Releases](https://github.com/rishinkalra/ai-footprint/releases/latest)** and unzip it.
+2. **Chrome-based browsers:** open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and choose the unzipped folder.
+3. **Firefox or Safari (Mac):** see [extension/README.md](extension/README.md#develop). Safari uses a one-command installer.
 
 **Dashboard**
 ```bash

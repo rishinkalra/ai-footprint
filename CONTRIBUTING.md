@@ -14,6 +14,16 @@ To fix one:
 
 Adding a new site works the same way: add an entry to `sites.js`, then regenerate the manifest matches (a test checks they agree).
 
+## Translations
+Each language is one file in `extension/src/locales/`, for example `hi.js` for Hindi. To add one:
+1. Copy `en.js` to `<code>.js` and translate the values. Keep `{placeholders}` exactly as they are.
+2. Write the comparisons ("Like a ceiling fan running for {time}") the way people would naturally say them, not word for word.
+3. For plurals, use the forms your language needs (`one`, `few`, `many`, `other`).
+4. Add the file's `<script>` line to the four pages (`popup.html`, `options.html`, `welcome.html`, `share.html`), and add it to the background list in `src/background.js` and `tools/build.js`.
+5. Run `npm test`. A test checks that every key and placeholder matches English.
+
+Reviews by native speakers of the existing Hindi and Spanish drafts are very welcome.
+
 ## Country data
 `extension/src/regions-data.js` (grid carbon intensity and electricity use per person, by country) is generated from Ember data. To refresh it, follow the commands at the top of `extension/tools/build-regions.py`. Don't edit it by hand.
 

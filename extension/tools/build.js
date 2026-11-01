@@ -3,6 +3,8 @@
 //   node tools/build.js          -> dist/chrome/, dist/firefox/ and a zip for each store
 //
 // Chrome, Edge, Brave, Opera, Arc: manifest.json as is (Manifest V3, service worker).
+// Safari (macOS): the same files with background scripts (a non-persistent page), wrapped
+//   into a Mac app by Apple's converter (see tools/install-safari.sh).
 // Firefox (desktop and Android): the same files, with a manifest that
 //   - lists the background scripts instead of a service worker (Firefox runs an event page),
 //   - adds the add-on ID and minimum versions Firefox needs,
@@ -17,7 +19,8 @@ const FILES = ['manifest.json', 'src', 'icons', 'fonts', '_locales', 'PRIVACY.md
 const FIREFOX_ID = 'ai-footprint@rishinkalra.github.io';
 
 // Scripts the background loads, in order. background.js imports the same list in Chrome.
-const BACKGROUND = ['core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js', 'background.js'];
+const BACKGROUND = ['core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js', 'format.js', 'i18n.js',
+  'locales/en.js', 'locales/hi.js', 'locales/es.js', 'compare.js', 'background.js'];
 
 function chromeManifest() {
   return JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
@@ -35,6 +38,14 @@ function firefoxManifest() {
     },
     gecko_android: { strict_min_version: '142.0' }
   };
+  return m;
+}
+
+function safariManifest() {
+  const m = chromeManifest();
+  // Safari runs Manifest V3 background scripts as a non-persistent page (it rejects
+  // the `persistent` key, and its service-worker support varies by version).
+  m.background = { scripts: BACKGROUND.map(f => 'src/' + f) };
   return m;
 }
 
@@ -61,10 +72,10 @@ function build(target, manifest) {
 }
 
 if (require.main === module) {
-  for (const [target, manifest] of [['chrome', chromeManifest()], ['firefox', firefoxManifest()]]) {
+  for (const [target, manifest] of [['chrome', chromeManifest()], ['firefox', firefoxManifest()], ['safari', safariManifest()]]) {
     const { out, zip } = build(target, manifest);
     console.log(`${target}: ${path.relative(ROOT, out)}/  ${path.relative(ROOT, zip)}`);
   }
 }
 
-module.exports = { chromeManifest, firefoxManifest, BACKGROUND, FIREFOX_ID };
+module.exports = { chromeManifest, firefoxManifest, safariManifest, BACKGROUND, FIREFOX_ID };
