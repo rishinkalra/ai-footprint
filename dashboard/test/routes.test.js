@@ -15,7 +15,7 @@ test('HTTP routes: widget, summary, authenticated ingest', async t => {
 
   const page = await fetch(`${base}/ai-footprint/?embed=1`);
   assert.equal(page.status, 200);
-  assert.match(await page.text(), /AI footprint/);
+  assert.match(await page.text(), /AI Footprint/);
   assert.equal((await fetch(`${base}/ai-footprint/widget.js`)).status, 200);
   const redirect = await fetch(`${base}/ai-footprint`, { redirect: 'manual' });
   assert.equal(redirect.status, 301);

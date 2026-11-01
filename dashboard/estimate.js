@@ -5,6 +5,7 @@
 //   date: 'YYYY-MM-DD', platform: 'claude-code', provider: 'anthropic',
 //   model: 'claude-opus-4-5', billing: 'api' | 'subscription',
 //   requests, inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens,
+//   cacheWrite1hTokens (the part of cacheWriteTokens written to a 1-hour cache),
 //   reportedCostUsd: number | null, source: 'local:claude-code'
 // }
 // inputTokens never include cache reads or cache writes.
@@ -82,7 +83,8 @@ function completePrice(p) {
     input: p.input,
     output: p.output,
     cacheRead: p.cacheRead != null ? p.cacheRead : p.input * 0.1,
-    cacheWrite: p.cacheWrite != null ? p.cacheWrite : p.input * 1.25
+    cacheWrite: p.cacheWrite != null ? p.cacheWrite : p.input * 1.25,
+    cacheWrite1h: p.cacheWrite1h != null ? p.cacheWrite1h : p.input * 2
   };
 }
 
@@ -92,7 +94,8 @@ function listPriceUsd(record, resolved) {
     (record.inputTokens || 0) * p.input +
     (record.outputTokens || 0) * p.output +
     (record.cacheReadTokens || 0) * p.cacheRead +
-    (record.cacheWriteTokens || 0) * p.cacheWrite
+    Math.max(0, (record.cacheWriteTokens || 0) - (record.cacheWrite1hTokens || 0)) * p.cacheWrite +
+    (record.cacheWrite1hTokens || 0) * p.cacheWrite1h
   ) / 1e6;
 }
 

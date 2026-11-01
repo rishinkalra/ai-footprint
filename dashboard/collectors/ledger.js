@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const { inferProvider } = require('../estimate');
 const { dateInTz } = require('../dates');
 
-const TOKEN_FIELDS = ['inputTokens', 'outputTokens', 'cacheReadTokens', 'cacheWriteTokens'];
+const TOKEN_FIELDS = ['inputTokens', 'outputTokens', 'cacheReadTokens', 'cacheWriteTokens', 'cacheWrite1hTokens'];
 
 function loadLedger(file) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return {}; }
@@ -60,6 +60,7 @@ function normalizeEvent(raw, cfg) {
     outputTokens: hasTokens ? tokens.outputTokens || 0 : n * cfg.chatDefaults.outputTokens,
     cacheReadTokens: tokens.cacheReadTokens || 0,
     cacheWriteTokens: tokens.cacheWriteTokens || 0,
+    cacheWrite1hTokens: Math.min(tokens.cacheWrite1hTokens || 0, tokens.cacheWriteTokens || 0),
     reportedCostUsd: costUsd,
     estimatedTokens: !hasTokens,
     note: cleanString(raw.note, 200),

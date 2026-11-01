@@ -58,8 +58,9 @@ const reply = Array.from({ length: 60 }, (_, i) => 'word' + i).join(' ');
     let [worker] = context.serviceWorkers();
     if (!worker) worker = await context.waitForEvent('serviceworker');
     const extId = new URL(worker.url()).host;
-    // Close the welcome/options tab opened on install.
-    await new Promise(r => setTimeout(r, 500));
+    // The welcome page opens on install.
+    await new Promise(r => setTimeout(r, 800));
+    assert.ok(context.pages().some(pg => pg.url().endsWith('/src/welcome.html')), 'welcome page opened on install');
 
     const routes = {
       'https://chatgpt.com/c/live': page({ ...chatgptMarkup, history: longHistory, stream: { prompt: 'Summarise this please', reply }, model: 'gpt-5-thinking' }),
@@ -105,7 +106,7 @@ const reply = Array.from({ length: 60 }, (_, i) => 'word' + i).join(' ');
     // 4) Popup renders the totals.
     const popup = await context.newPage();
     await popup.goto(`chrome-extension://${extId}/src/popup.html`);
-    await popup.waitForSelector('.tile');
+    await popup.waitForSelector('.hero .big');
     const text = await popup.textContent('main');
     assert.match(text, /ChatGPT/);
     assert.match(text, /Claude/);
@@ -114,8 +115,31 @@ const reply = Array.from({ length: 60 }, (_, i) => 'word' + i).join(' ');
 
     const opts = await context.newPage();
     await opts.goto(`chrome-extension://${extId}/src/options.html`);
-    await opts.waitForSelector('#sites label');
+    await opts.waitForSelector('#sites .app');
     await opts.screenshot({ path: path.join(os.tmpdir(), 'fp-options.png'), fullPage: true });
+
+    // Settings save as you change them.
+    await opts.locator('[data-site="gemini"]').uncheck({ force: true });
+    await opts.waitForTimeout(300);
+    const saved = await worker.evaluate(() => chrome.storage.local.get('settings').then(d => d.settings));
+    assert.equal(saved.sites.gemini, false, 'turning an app off is saved immediately');
+
+    // Welcome page saves the goal.
+    const welcome = await context.newPage();
+    await welcome.goto(`chrome-extension://${extId}/src/welcome.html`);
+    await welcome.click('[data-goal="10"]');
+    await welcome.click('#start');
+    await welcome.waitForSelector('#next:not([hidden])');
+    const afterWelcome = await worker.evaluate(() => chrome.storage.local.get('settings').then(d => d.settings));
+    assert.equal(afterWelcome.dailyGoalWh, 10);
+
+    // Share card draws a non-empty image.
+    const share = await context.newPage();
+    await share.goto(`chrome-extension://${extId}/src/share.html`);
+    await share.waitForTimeout(600);
+    const size = await share.evaluate(() => { const c = document.getElementById('card'); return [c.width, c.height, c.toDataURL().length]; });
+    assert.deepEqual(size.slice(0, 2), [1200, 630]);
+    assert.ok(size[2] > 20000, 'card has content');
 
     console.log('e2e ok');
   } finally {

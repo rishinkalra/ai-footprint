@@ -9,9 +9,9 @@
 // }
 
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core'));
-  else root.FootprintStore = factory(root.FootprintCore);
-})(typeof self !== 'undefined' ? self : this, function (core) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core'), require('./regions'));
+  else root.FootprintStore = factory(root.FootprintCore, root.FootprintRegions);
+})(typeof self !== 'undefined' ? self : this, function (core, regions) {
   'use strict';
 
   var MAX_THREADS = 500;
@@ -22,7 +22,9 @@
     showBadge: true,
     sites: {},            // { siteId: false } turns a site off
     models: {},           // { siteId: 'claude-opus' } when the page doesn't say
-    carbonKgPerKwh: null,
+    region: null,         // ISO country code; null = detect from the browser
+    carbonBasis: null,    // 'datacentre' (default) | 'local' | 'world' | 'custom'
+    carbonKgPerKwh: null, // used when carbonBasis is 'custom'
     plans: [],            // [{ name, monthly, currency }]
     sync: { enabled: false, url: '', key: '' }
   };
@@ -53,19 +55,43 @@
     return typeof v === 'string' && v.trim() ? v.trim().toLowerCase().slice(0, 80) : null;
   }
 
-  // msg from the content script: { site, model, promptChars, contextChars, outputChars, images, threadKey }
-  function recordTurn(state, msg, settings, nowMs) {
+  function regionOf(settings, env) {
+    return settings.region || (env && env.region) || 'WORLD';
+  }
+
+  // Tokens from the content script's script-aware estimate, or from characters (older pages).
+  function tokensOf(msg, key) {
+    var t = msg[key + 'Tokens'];
+    return t != null ? cleanNumber(t) : core.tokensFromChars(cleanNumber(msg[key + 'Chars']));
+  }
+
+  // msg from the content script:
+  //   { site, model, promptTokens, contextTokens, outputTokens, images, threadKey }
+  //   contextTokens is everything before the reply, the prompt included.
+  // env: { region } detected from the browser when settings.region is unset.
+  function recordTurn(state, msg, settings, nowMs, env) {
     var date = core.localDate(nowMs);
     var model = cleanModel(msg.model) || cleanModel(settings.models[msg.site]) || 'unknown';
-    var contextTokens = core.tokensFromChars(cleanNumber(msg.contextChars));
+    var contextTokens = tokensOf(msg, 'context');
+    var outputTokens = tokensOf(msg, 'output');
+
+    // Prompt cache: if this chat had a reply less than 5 minutes ago, the conversation
+    // up to the end of that reply is still cached by the provider.
+    var key = String(msg.threadKey || msg.site).slice(0, 300);
+    var thread = state.threads[key] = state.threads[key] || { tips: {}, at: 0 };
+    var cachedTokens = thread.at && nowMs - thread.at <= core.CACHE_TTL_MS
+      ? Math.min(contextTokens, thread.lastTotalTokens || 0) : 0;
+
     var turn = {
       model: model,
       inputTokens: contextTokens,
-      outputTokens: core.tokensFromChars(cleanNumber(msg.outputChars)),
-      promptTokens: core.tokensFromChars(cleanNumber(msg.promptChars)),
+      cachedTokens: cachedTokens,
+      outputTokens: outputTokens,
+      promptTokens: tokensOf(msg, 'prompt'),
       images: Math.min(20, Math.floor(cleanNumber(msg.images)))
     };
-    var a = core.assessTurn(turn, settings);
+    var carbon = regions.carbonFactor(settings, regionOf(settings, env));
+    var a = core.assessTurn(turn, { carbonKgPerKwh: carbon.kgPerKwh });
 
     var day = state.days[date] = state.days[date] || {};
     var site = day[msg.site] = day[msg.site] || {};
@@ -73,6 +99,7 @@
     site[model] = core.addTotals(prev, {
       turns: 1,
       inputTokens: a.inputTokens,
+      cachedTokens: a.cachedTokens,
       outputTokens: a.outputTokens,
       images: turn.images,
       wh: a.wh,
@@ -84,10 +111,10 @@
     });
     state.dirty[date] = true;
 
-    // Nudges: at most one per reply, each kind once per thread.
-    var key = String(msg.threadKey || msg.site).slice(0, 300);
-    var thread = state.threads[key] = state.threads[key] || { tips: {}, at: 0 };
     thread.at = nowMs;
+    thread.lastTotalTokens = contextTokens + outputTokens;
+
+    // Nudges: at most one per reply, each kind once per thread.
     var tip = core.tipForTurn(turn, {
       longThreadTipShown: thread.tips['long-thread'],
       reasoningTipShown: thread.tips['reasoning-short'],
@@ -105,6 +132,7 @@
     return {
       replyWh: a.wh,
       replyCo2g: a.co2g,
+      replyWaterMl: a.waterMl,
       todayWh: todayWh,
       goalWh: settings.dailyGoalWh,
       tier: a.tier,
@@ -152,13 +180,32 @@
     return { totals: totals, bySite: bySite, byModel: byModel, daily: daily };
   }
 
+  // Carbon and water always follow the user's current choices, so changing the
+  // carbon basis or country updates past days too.
+  function restate(t, kgPerKwh) {
+    t.co2g = t.wh * kgPerKwh;
+    t.waterMl = t.wh * core.DEFAULTS.waterLitresPerKwh;
+    return t;
+  }
+
   // range: 'today' | '7d' | '30d'
-  function summary(state, settings, range, nowMs) {
+  // env: { region } detected from the browser when settings.region is unset.
+  function summary(state, settings, range, nowMs, env) {
     var span = range === 'today' ? 1 : range === '30d' ? 30 : 7;
     var to = core.localDate(nowMs);
     var from = core.addDays(to, -(span - 1));
     var cur = rangeTotals(state, from, to);
     var prev = rangeTotals(state, core.addDays(from, -span), core.addDays(from, -1));
+    var region = regions.info(regionOf(settings, env));
+    var carbon = regions.carbonFactor(settings, region.code);
+    var k = carbon.kgPerKwh;
+    restate(cur.totals, k);
+    restate(prev.totals, k);
+    Object.keys(cur.bySite).forEach(function (x) { restate(cur.bySite[x], k); });
+    Object.keys(cur.byModel).forEach(function (x) { restate(cur.byModel[x], k); });
+    cur.daily.forEach(function (d) { restate(d.totals, k); });
+    var today = restate(dayTotals(state, to), k);
+    var personWh = region.perPersonWhDay * span;
     var planPerDay = {};
     (settings.plans || []).forEach(function (p) {
       var cur = String(p.currency || 'USD').toUpperCase();
@@ -174,9 +221,14 @@
       bySite: cur.bySite,
       byModel: cur.byModel,
       daily: cur.daily,
-      equivalents: core.equivalents(cur.totals),
+      equivalents: core.equivalents(cur.totals, region.carGPerKm),
       insights: core.insights(cur.totals),
-      today: dayTotals(state, to),
+      today: today,
+      region: region,
+      carbon: carbon,
+      // The period's AI energy as a share of the electricity one person in the
+      // user's country uses over the same number of days (all uses, Ember data).
+      perspective: { personWh: personWh, share: personWh > 0 ? cur.totals.wh / personWh : 0 },
       goalWh: settings.dailyGoalWh,
       planCost: planCost
     };
@@ -199,7 +251,8 @@
             model: m === 'unknown' && sites[s] ? sites[s].defaultModel : m,
             billing: 'subscription',
             requests: t.turns,
-            inputTokens: t.inputTokens,
+            inputTokens: Math.max(0, t.inputTokens - (t.cachedTokens || 0)),
+            cacheReadTokens: t.cachedTokens || 0,
             outputTokens: t.outputTokens,
             source: 'browser-extension',
             note: t.images ? t.images + ' generated images' : undefined

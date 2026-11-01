@@ -39,11 +39,11 @@ module.exports = {
   },
 
   // Grid carbon intensity (kg CO2e per kWh) and on-site cooling water (L per kWh).
-  // 0.40 kg/kWh is roughly the location-based average for the regions big AI
-  // data centres run in; the world average is ~0.45. Override per provider if you
-  // trust their market-based numbers.
+  // 0.384 kg/kWh is Ember's 2025 lifecycle intensity for the US grid, where most
+  // large AI inference runs (world average 0.458). Override per provider if you
+  // trust their market-based numbers, e.g. byProvider: { google: 0.125 }.
   carbon: {
-    defaultKgPerKwh: 0.40,
+    defaultKgPerKwh: 0.384,
     byProvider: {}
   },
   water: {
@@ -60,8 +60,8 @@ module.exports = {
   },
 
   // ---------------------------------------------------------------------------
-  // List prices, USD per million tokens. cacheWrite defaults to 1.25 × input,
-  // cacheRead to 0.1 × input when not given. Longest matching prefix wins.
+  // List prices, USD per million tokens. When not given: cacheRead = 0.1 × input,
+  // cacheWrite (5-minute cache) = 1.25 × input, cacheWrite1h (1-hour cache) = 2 × input. Longest matching prefix wins.
   // Claude prices: Anthropic API table, Oct 2026. Others: verify before relying on them.
   // ---------------------------------------------------------------------------
   pricing: {

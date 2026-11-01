@@ -1,17 +1,79 @@
 body { width: 380px; }
-body.tab { width: auto; max-width: 420px; margin: 24px auto; }
-main { padding: 12px; display: grid; gap: 10px; }
-header { display: flex; justify-content: space-between; align-items: center; }
-.goal .row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
-.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
-.tile .label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.tile .value { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 2px 0; }
-.tile .sub { font-size: 12px; color: var(--text-2); }
-.trend { margin: 0; font-size: 13px; color: var(--text-2); }
-.site { display: grid; grid-template-columns: 92px 1fr 64px; gap: 8px; align-items: center; font-size: 13px; margin-bottom: 6px; }
-.site:last-child { margin-bottom: 0; }
-.site .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-2); }
-#insights { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; }
-footer { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 2px 0; }
-.empty { color: var(--muted); font-size: 13px; margin: 0; }
+body.tab { width: auto; }
+body.tab .pop { max-width: 400px; margin: 24px auto; }
+.pop { padding: 14px; display: grid; gap: 10px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 2px 4px; }
+.logo .mark { color: var(--moss); display: inline-flex; }
+
+/* hero: the period's energy, with today's goal ring alongside */
+.hero { padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
+.hero .big { font-size: var(--t-3xl); line-height: 1; margin: 6px 0 6px; }
+.hero .big .unit { font-size: var(--t-lg); margin-left: 4px; }
+.hero .range { font-size: var(--t-xs); color: var(--muted); }
+.hero .compare { font-size: var(--t-sm); color: var(--ink-2); margin-top: 8px; }
+.hero .local { display: flex; gap: 6px; align-items: flex-start; font-size: var(--t-xs); color: var(--muted); margin-top: 6px; line-height: 1.4; }
+.hero .local svg { flex: none; margin-top: 2px; color: var(--moss); }
+.hero .trend { margin-top: 10px; white-space: nowrap; }
+.ring { position: relative; width: 92px; height: 92px; }
+.ring svg { display: block; transform: rotate(-90deg); }
+.ring .track { stroke: var(--track); }
+.ring .arc { stroke: var(--data); transition: stroke-dashoffset .4s ease; }
+.ring.over .arc { stroke: var(--sun); }
+.ring .in { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.ring .in .num { font-size: var(--t-lg); line-height: 1.1; }
+.ring .in .label { font-size: 11px; }
+.ring-cap { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; max-width: 92px; }
+.ring-cap.over { color: var(--sun); font-weight: 600; }
+
+/* three secondary figures */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 12px 4px; }
+.stat { padding: 0 12px; display: grid; gap: 2px; align-content: start; }
+.stat + .stat { border-left: 1px solid var(--line); }
+.stat .v { font-size: var(--t-lg); line-height: 1.2; }
+.stat .v .unit { font-size: var(--t-xs); margin-left: 2px; }
+.stat .s { font-size: 11px; color: var(--muted); line-height: 1.35; }
+
+/* daily chart */
+.chart { padding: 14px 16px 12px; }
+.chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.chart-head .readout { font-size: var(--t-xs); color: var(--ink-2); }
+.cols { position: relative; height: 84px; display: flex; align-items: flex-end; gap: 3px; border-bottom: 1px solid var(--line); }
+.cols .grid { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--line); }
+.cols .grid span { position: absolute; left: 0; top: 2px; font-size: 10px; color: var(--muted); background: var(--surface); padding-right: 4px; }
+.col { flex: 1; height: 100%; display: flex; align-items: flex-end; background: none; border: 0; padding: 0; cursor: default; border-radius: 4px; }
+.col i { display: block; width: 100%; min-height: 0; background: var(--data); opacity: .78; border-radius: 4px 4px 0 0; }
+.col.today i { background: var(--moss); opacity: 1; }
+.col:hover i, .col:focus-visible i { opacity: 1; }
+.col.zero i { background: var(--track); opacity: 1; height: 2px !important; }
+.ticks { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+/* apps */
+.apps, .tips { padding: 14px 16px; }
+.sec-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.sec-title h2 { font-size: var(--t-sm); }
+.app { display: grid; grid-template-columns: 26px 1fr auto; gap: 4px 10px; align-items: center; }
+.app + .app { margin-top: 10px; }
+.app .name { font-size: var(--t-sm); font-weight: 600; }
+.app .val { font-size: var(--t-sm); text-align: right; }
+.app .val small { color: var(--muted); font-size: 11px; margin-left: 4px; }
+.app .bar { grid-column: 2 / -1; height: 6px; }
+
+/* tips */
+.tip { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; }
+.tip + .tip { margin-top: 12px; }
+.tip .ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--moss-soft); color: var(--moss); }
+.tip.personal .ic { background: var(--sun-soft); color: var(--sun); }
+.tip p { font-size: var(--t-sm); color: var(--ink-2); }
+.tip .chip { margin-bottom: 4px; padding: 2px 8px; font-size: 10.5px; }
+
+/* empty state */
+.empty { padding: 18px 16px; display: grid; gap: 12px; }
+.empty h2 { font-size: var(--t-xl); }
+.empty p { color: var(--ink-2); font-size: var(--t-sm); }
+.sites { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.foot { display: flex; justify-content: space-between; align-items: center; padding: 0 2px; }
+.private { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.foot .actions { display: inline-flex; gap: 2px; }
+.foot .btn { font-size: var(--t-xs); padding: 6px 8px; }

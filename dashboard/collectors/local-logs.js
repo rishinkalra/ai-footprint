@@ -52,6 +52,7 @@ function parseClaudeCode(text, file) {
       output: num(u.output_tokens),
       cacheRead: num(u.cache_read_input_tokens),
       cacheWrite: num(u.cache_creation_input_tokens),
+      cacheWrite1h: num(u.cache_creation && u.cache_creation.ephemeral_1h_input_tokens),
       cost: typeof obj.costUSD === 'number' ? obj.costUSD : null
     };
     const prev = byKey.get(key);
@@ -181,7 +182,7 @@ function entriesToRecords(entries, { platform, billing, source, timezone }) {
     if (!r) {
       r = {
         date, platform, provider, account: provider, model: e.model, billing,
-        requests: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0,
+        requests: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0, cacheWrite1hTokens: 0,
         reportedCostUsd: null, source
       };
       groups.set(gk, r);
@@ -191,6 +192,7 @@ function entriesToRecords(entries, { platform, billing, source, timezone }) {
     r.outputTokens += e.output;
     r.cacheReadTokens += e.cacheRead;
     r.cacheWriteTokens += e.cacheWrite;
+    r.cacheWrite1hTokens += e.cacheWrite1h || 0;
     if (e.cost != null) r.reportedCostUsd = (r.reportedCostUsd || 0) + e.cost;
   }
   return [...groups.values()];

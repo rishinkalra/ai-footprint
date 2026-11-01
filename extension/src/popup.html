@@ -2,43 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI footprint</title>
-  <link rel="stylesheet" href="ui.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Footprint</title>
+  <link rel="stylesheet" href="theme.css" />
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <main>
-    <header>
-      <h1>⚡ AI footprint</h1>
+  <main class="pop">
+    <header class="top">
+      <a class="logo" href="welcome.html" target="_blank" id="logo"><span class="mark" id="mark"></span>AI Footprint</a>
       <div class="seg" role="group" aria-label="Period" id="rangeSeg">
-        <button data-range="today">Today</button>
-        <button data-range="7d" aria-pressed="true">7 days</button>
-        <button data-range="30d">30 days</button>
+        <button type="button" data-range="today">Today</button>
+        <button type="button" data-range="7d" aria-pressed="true">7 days</button>
+        <button type="button" data-range="30d">30 days</button>
       </div>
     </header>
 
-    <section class="card goal" id="goal"></section>
-    <section class="tiles" id="tiles"></section>
-    <p class="trend" id="trend"></p>
+    <section class="card hero" id="hero" aria-live="polite"></section>
+    <section class="card stats" id="stats"></section>
+    <section class="card chart" id="chart"></section>
+    <section class="card apps" id="apps"></section>
+    <section class="card tips" id="tips"></section>
 
-    <section class="card">
-      <h2>By app</h2>
-      <div id="sites"></div>
-    </section>
-
-    <section class="card" id="insightsCard">
-      <h2>Lower your footprint</h2>
-      <ul id="insights"></ul>
-    </section>
-
-    <footer>
-      <a href="options.html" target="_blank" id="settingsLink">Settings &amp; how we estimate</a>
-      <span class="muted">Estimates · stays on this device</span>
+    <footer class="foot">
+      <span class="private" id="private"></span>
+      <span class="actions">
+        <a class="btn quiet" href="share.html" target="_blank" id="shareLink"></a>
+        <a class="btn quiet" href="options.html" target="_blank" id="settingsLink"></a>
+      </span>
     </footer>
   </main>
   <script src="core.js"></script>
   <script src="sites.js"></script>
+  <script src="regions-data.js"></script>
+  <script src="regions.js"></script>
   <script src="store.js"></script>
+  <script src="format.js"></script>
+  <script src="icons.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -59,9 +59,25 @@ test('subscription usage counts as value, not spend', () => {
 
 test('carbon and water scale from energy, with a range', () => {
   const a = est.assess({ model: 'gpt-4o', billing: 'api', outputTokens: 1e6 }, cfg);
-  assert.ok(Math.abs(a.co2Kg.mid - a.energyKwh.mid * 0.4) < 1e-12);
+  assert.ok(Math.abs(a.co2Kg.mid - a.energyKwh.mid * 0.384) < 1e-12);
   assert.ok(Math.abs(a.waterL.mid - a.energyKwh.mid * 1.1) < 1e-12);
   assert.ok(a.energyKwh.low < a.energyKwh.mid && a.energyKwh.mid < a.energyKwh.high);
+});
+
+test('worked example: Claude Code turn with caching (see METHODOLOGY.md)', () => {
+  // Opus 4.5: 300 fresh input, 120,000 cache reads, 2,000 cache writes (500 of them 1-hour), 1,500 output.
+  const r = { model: 'claude-opus-4-5', billing: 'api', inputTokens: 300, cacheReadTokens: 120000,
+    cacheWriteTokens: 2000, cacheWrite1hTokens: 500, outputTokens: 1500 };
+  const a = est.assess(r, cfg);
+  // Energy, large tier: (300 + 120000 × 0.1 + 2000 × 1.0) / 1000 × 0.12 + 1500 / 1000 × 1.5
+  //   = 14.3 × 0.12 + 2.25 = 1.716 + 2.25 = 3.966 Wh
+  assert.ok(Math.abs(a.energyKwh.mid * 1000 - 3.966) < 1e-9, String(a.energyKwh.mid * 1000));
+  // Price ($/MTok 5 in, 25 out, 0.5 cache read, 6.25 5-min write, 10 1-hour write):
+  //   300×5 + 120000×0.5 + 1500×6.25 + 500×10 + 1500×25 = 1500 + 60000 + 9375 + 5000 + 37500 = 113,375 → $0.113375
+  assert.ok(Math.abs(a.apiEquivalentUsd - 0.113375) < 1e-12, String(a.apiEquivalentUsd));
+  // Carbon at 0.384 kg/kWh, water at 1.1 L/kWh
+  assert.ok(Math.abs(a.co2Kg.mid * 1000 - 3.966 * 0.384) < 1e-9);
+  assert.ok(Math.abs(a.waterL.mid * 1000 - 3.966 * 1.1) < 1e-9);
 });
 
 test('provider inference', () => {
