@@ -86,5 +86,11 @@
     return out;
   }
 
-  return { SITES: SITES, siteForHost: siteForHost, allHosts: allHosts };
+  // Match patterns for site access. Chrome grants these at install; Firefox may
+  // ask the user to allow them separately.
+  function origins() {
+    return allHosts().map(function (h) { return 'https://' + h + '/*'; });
+  }
+
+  return { SITES: SITES, siteForHost: siteForHost, allHosts: allHosts, origins: origins };
 });

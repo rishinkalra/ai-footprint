@@ -12,7 +12,7 @@ It is built for anyone, anywhere. It is private by design: no account, no server
 | | |
 |---|---|
 | Works on | ChatGPT, Claude, Gemini, Perplexity, Microsoft Copilot, DeepSeek, Le Chat, Grok |
-| Browsers | Chrome, Edge, Brave, Arc, Opera (Manifest V3). Firefox needs a small manifest tweak (see roadmap). |
+| Browsers | Chrome, Edge, Brave, Arc, Opera, Vivaldi (Manifest V3), and Firefox 140+ on desktop and Firefox 142+ on Android, from the same code |
 | Shows | A small badge on the page (this reply · today · goal), a popup with totals by app, and settings |
 | Nudges | Long-chat tip with the real saving, thinking-model tip for quick questions, image tip, daily energy goal |
 | Money | Your plans (any currency) pro-rated per day, plus what the tokens would cost at API prices |
@@ -51,15 +51,19 @@ npm run render        # store/screens and store/listing: every screen with demo 
 node store/render.js popup --locale=en-IN   # one screen as a browser in another country
 ```
 
-Load unpacked: open `chrome://extensions`, turn on Developer mode, click **Load unpacked**, and pick this folder.
+**Chrome, Edge, Brave, Arc, Opera:** open `chrome://extensions` (Edge: `edge://extensions`), turn on Developer mode, click **Load unpacked**, and pick this folder.
+
+**Firefox:** run `npm run build`, or download the `ai-footprint-firefox` zip from the latest CI run and unzip it. Then open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…**, and pick `manifest.json` inside `dist/firefox` (or the unzipped folder). Firefox removes temporary add-ons when it restarts. For a lasting install before the public listing, sign it as an unlisted add-on on addons.mozilla.org, which is free. If Firefox shows "Allow on AI sites" in the welcome page or popup, click it; Firefox can ask for site access separately.
+
+`npm run build` writes `dist/chrome/` and `dist/firefox/`, plus a store zip for each. The Firefox version uses the same files with a different manifest: an event page instead of a service worker, an add-on ID, and a "collects no data" declaration (`tools/build.js`). `npm run lint:firefox` runs Mozilla's add-on validator.
 
 Site markup changes over time. Each site's selectors live in `src/sites.js` with fallbacks, and the e2e test runs against fake pages that use the same markup.
 
 ## Publishing for global users
 
-1. **Chrome Web Store** (also covers Edge, Brave and Opera): $5 developer account. Upload the `npm run build` zip with `PRIVACY.md` as the privacy policy. The single purpose is "show the estimated environmental footprint of AI chat replies". Permissions: `storage` and `alarms`, plus the AI sites as content-script matches.
+1. **Chrome Web Store** (also covers Edge, Brave and Opera): $5 developer account. Upload `dist/ai-footprint-chrome-<version>.zip` with `PRIVACY.md` as the privacy policy. The single purpose is "show the estimated environmental footprint of AI chat replies". Permissions: `storage` and `alarms`, plus the AI sites as content-script matches.
 2. **Microsoft Edge Add-ons:** free, same zip.
-3. **Firefox Add-ons:** add `browser_specific_settings.gecko.id`. Firefox MV3 uses `background.scripts` instead of `service_worker`.
+3. **Firefox Add-ons** (desktop and Android): free. Upload `dist/ai-footprint-firefox-<version>.zip`. It passes Mozilla's linter with no errors or warnings. Because the extension uses no build step, reviewers can read the source as is.
 4. **Translations:** store text lives in `_locales/`; numbers and currencies already follow the user's locale. Next: move UI strings into `_locales` and add hi, es, pt, fr, de, ja, zh, ar.
 
 ## Roadmap: the rest of "wherever and however"

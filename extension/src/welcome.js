@@ -5,16 +5,26 @@
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
-  $('mark').innerHTML = I.get('mark', 26);
-  $('pvMark').innerHTML = I.get('mark', 15);
-  $('pvIcon').innerHTML = I.get('chat', 14);
-  $('ic1').innerHTML = I.get('leaf', 18);
-  $('ic2').innerHTML = I.get('lock', 18);
-  $('ic3').innerHTML = I.get('check', 18);
-  $('sites').innerHTML = FootprintSites.SITES.map(function (s) { return '<span class="chip">' + esc(s.name) + '</span>'; }).join('');
-  $('links').innerHTML = FootprintSites.SITES.slice(0, 4).map(function (s) {
+  FootprintDOM.set($('mark'), I.get('mark', 26));
+  FootprintDOM.set($('pvMark'), I.get('mark', 15));
+  FootprintDOM.set($('pvIcon'), I.get('chat', 14));
+  FootprintDOM.set($('ic1'), I.get('leaf', 18));
+  FootprintDOM.set($('ic2'), I.get('lock', 18));
+  FootprintDOM.set($('ic3'), I.get('check', 18));
+  FootprintDOM.set($('sites'), FootprintSites.SITES.map(function (s) { return '<span class="chip">' + esc(s.name) + '</span>'; }).join(''));
+  FootprintDOM.set($('links'), FootprintSites.SITES.slice(0, 4).map(function (s) {
     return '<a class="btn" href="https://' + esc(s.hosts[0]) + '/" target="_blank" rel="noreferrer">Open ' + esc(s.name) + '</a>';
-  }).join('');
+  }).join(''));
+
+  // Firefox can leave site access off until the user allows it.
+  function checkAccess() {
+    if (!chrome.permissions || !chrome.permissions.contains) return;
+    chrome.permissions.contains({ origins: FootprintSites.origins() }, function (ok) { $('access').hidden = !!ok; });
+  }
+  $('allow').addEventListener('click', function () {
+    chrome.permissions.request({ origins: FootprintSites.origins() }, function () { checkAccess(); });
+  });
+  checkAccess();
 
   var region = FootprintRegions.info(FootprintRegions.detect(navigator.languages, Intl.DateTimeFormat().resolvedOptions().timeZone));
   var slider = $('goal');
@@ -40,7 +50,7 @@
       var s = data.settings || {};
       s.dailyGoalWh = Number(slider.value);
       chrome.storage.local.set({ settings: s }, function () {
-        $('saved').innerHTML = I.get('check', 16) + 'Saved';
+        FootprintDOM.set($('saved'), I.get('check', 16) + 'Saved');
         $('next').hidden = false;
         $('next').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
       });

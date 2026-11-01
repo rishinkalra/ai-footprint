@@ -1,7 +1,11 @@
 /* global importScripts, FootprintCore, FootprintStore, FootprintSites, FootprintRegions */
-// Service worker: records turns, keeps totals in chrome.storage.local, and
-// (only if the user turns it on) syncs daily totals to their own dashboard.
-importScripts('core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js');
+// Background: records turns, keeps totals in chrome.storage.local, and (only if
+// the user turns it on) syncs daily totals to their own dashboard.
+// Chrome runs this as a service worker and loads the helpers here; Firefox runs it
+// as an event page whose manifest loads them first (see tools/build.js).
+if (typeof importScripts === 'function' && typeof FootprintStore === 'undefined') {
+  importScripts('core.js', 'sites.js', 'regions-data.js', 'regions.js', 'store.js');
+}
 
 var SYNC_ALARM = 'ai-footprint-sync';
 var queue = Promise.resolve();

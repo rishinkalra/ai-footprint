@@ -22,6 +22,7 @@ Adding a new site works the same way: add an entry to `sites.js`, then regenerat
 cd dashboard && npm install && npm test
 cd ../extension && npm test
 npm install && npx playwright install chromium && npm run test:e2e
+npm run lint:firefox     # builds dist/firefox and runs Mozilla's add-on validator
 ```
 
 ## Ground rules

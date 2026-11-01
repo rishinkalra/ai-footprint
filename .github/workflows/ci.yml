@@ -24,10 +24,17 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
           node test/e2e/extension.e2e.js
-      - name: Build extension zip
+      - name: Build for Chrome and Firefox
         working-directory: extension
         run: npm run build
+      - name: Validate the Firefox build with Mozilla's add-on linter
+        working-directory: extension
+        run: npx -y addons-linter dist/firefox
       - uses: actions/upload-artifact@v4
         with:
-          name: ai-footprint-extension
-          path: extension/dist/*.zip
+          name: ai-footprint-chrome
+          path: extension/dist/ai-footprint-chrome-*.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-footprint-firefox
+          path: extension/dist/ai-footprint-firefox-*.zip
