@@ -62,3 +62,13 @@ test('background.js loads the same helpers as the Firefox manifest lists', () =>
 test('site access patterns cover every supported site', () => {
   assert.deepEqual(sites.origins().sort(), manifest.content_scripts[0].matches.slice().sort());
 });
+
+test('Safari build: non-persistent background page, otherwise identical', () => {
+  const { safariManifest, chromeManifest, BACKGROUND } = require('../tools/build');
+  const sf = safariManifest();
+  assert.deepEqual(sf.background, { scripts: BACKGROUND.map(f => 'src/' + f), persistent: false });
+  const ch = chromeManifest();
+  assert.deepEqual(sf.content_scripts, ch.content_scripts);
+  assert.deepEqual(sf.permissions, ch.permissions);
+  assert.equal(sf.browser_specific_settings, undefined);
+});

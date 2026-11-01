@@ -3,6 +3,8 @@
 //   node tools/build.js          -> dist/chrome/, dist/firefox/ and a zip for each store
 //
 // Chrome, Edge, Brave, Opera, Arc: manifest.json as is (Manifest V3, service worker).
+// Safari (macOS): the same files with a non-persistent background page, wrapped
+//   into a Mac app by Apple's converter (see tools/install-safari.sh).
 // Firefox (desktop and Android): the same files, with a manifest that
 //   - lists the background scripts instead of a service worker (Firefox runs an event page),
 //   - adds the add-on ID and minimum versions Firefox needs,
@@ -38,6 +40,13 @@ function firefoxManifest() {
   return m;
 }
 
+function safariManifest() {
+  const m = chromeManifest();
+  // Safari runs Manifest V3 background code as a non-persistent page.
+  m.background = { scripts: BACKGROUND.map(f => 'src/' + f), persistent: false };
+  return m;
+}
+
 function copy(src, dest) {
   const st = fs.statSync(src);
   if (st.isDirectory()) {
@@ -61,10 +70,10 @@ function build(target, manifest) {
 }
 
 if (require.main === module) {
-  for (const [target, manifest] of [['chrome', chromeManifest()], ['firefox', firefoxManifest()]]) {
+  for (const [target, manifest] of [['chrome', chromeManifest()], ['firefox', firefoxManifest()], ['safari', safariManifest()]]) {
     const { out, zip } = build(target, manifest);
     console.log(`${target}: ${path.relative(ROOT, out)}/  ${path.relative(ROOT, zip)}`);
   }
 }
 
-module.exports = { chromeManifest, firefoxManifest, BACKGROUND, FIREFOX_ID };
+module.exports = { chromeManifest, firefoxManifest, safariManifest, BACKGROUND, FIREFOX_ID };
