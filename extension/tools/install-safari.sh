@@ -10,7 +10,9 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 APP_NAME="AI Footprint"
-BUNDLE_ID="io.github.rishinkalra.aifootprint"
+# The converter names the app <prefix>.<App-Name> and the extension <this>.Extension,
+# so this must end in the app name for the two to nest (macOS requires it).
+BUNDLE_ID="io.github.rishinkalra.AI-Footprint"
 OUT="$HERE/dist/safari-app"
 
 fail() { printf '\n\033[31m%s\033[0m\n' "$1" >&2; exit 1; }
@@ -32,6 +34,27 @@ xcrun safari-web-extension-converter "$HERE/dist/safari" \
 
 PROJECT="$(find "$OUT" -name '*.xcodeproj' -maxdepth 3 | head -n 1)"
 [[ -n "$PROJECT" ]] || fail "The converter did not create an Xcode project in $OUT."
+
+# Belt and braces: make sure the extension's bundle ID starts with the app's, in the
+# project and in the generated Swift that refers to it.
+python3 - "$PROJECT/project.pbxproj" "$OUT" <<'PY'
+import os, re, sys
+pbx, root = sys.argv[1], sys.argv[2]
+text = open(pbx).read()
+ids = sorted(set(re.findall(r'PRODUCT_BUNDLE_IDENTIFIER = "?([^";]+)"?;', text)))
+ext = [i for i in ids if i.endswith('.Extension')]
+app = [i for i in ids if not i.endswith('.Extension')]
+if len(ext) == 1 and len(app) == 1 and not ext[0].startswith(app[0] + '.'):
+    new = app[0] + '.Extension'
+    for dirpath, _, files in os.walk(root):
+        for f in files:
+            if f.endswith(('.pbxproj', '.swift', '.plist', '.entitlements')):
+                p = os.path.join(dirpath, f)
+                s = open(p, encoding='utf-8', errors='ignore').read()
+                if ext[0] in s:
+                    open(p, 'w', encoding='utf-8').write(s.replace(ext[0], new))
+    print('Extension bundle ID set to ' + new)
+PY
 SCHEME="$(xcodebuild -list -project "$PROJECT" 2>/dev/null | awk '/Schemes:/{getline; gsub(/^ +/, ""); print; exit}')"
 [[ -n "$SCHEME" ]] || fail "Could not find the app's build scheme in $PROJECT."
 

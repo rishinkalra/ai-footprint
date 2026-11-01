@@ -3,7 +3,7 @@
 //   node tools/build.js          -> dist/chrome/, dist/firefox/ and a zip for each store
 //
 // Chrome, Edge, Brave, Opera, Arc: manifest.json as is (Manifest V3, service worker).
-// Safari (macOS): the same files with a non-persistent background page, wrapped
+// Safari (macOS): the same files with background scripts (a non-persistent page), wrapped
 //   into a Mac app by Apple's converter (see tools/install-safari.sh).
 // Firefox (desktop and Android): the same files, with a manifest that
 //   - lists the background scripts instead of a service worker (Firefox runs an event page),
@@ -42,8 +42,9 @@ function firefoxManifest() {
 
 function safariManifest() {
   const m = chromeManifest();
-  // Safari runs Manifest V3 background code as a non-persistent page.
-  m.background = { scripts: BACKGROUND.map(f => 'src/' + f), persistent: false };
+  // Safari runs Manifest V3 background scripts as a non-persistent page (it rejects
+  // the `persistent` key, and its service-worker support varies by version).
+  m.background = { scripts: BACKGROUND.map(f => 'src/' + f) };
   return m;
 }
 
