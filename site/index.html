@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Footprint: see the energy behind every AI reply</title>
+  <meta name="description" content="A free, open-source browser extension and dashboard that shows the energy, carbon, water and cost of every AI reply, in terms that make sense where you live. Private by design." />
+  <meta name="theme-color" content="#f3f5f0" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0d1310" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="assets/brand/icon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="https://rishinkalra.github.io/ai-footprint/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AI Footprint: see the energy behind every AI reply" />
+  <meta property="og:description" content="Energy, carbon, water and cost for ChatGPT, Claude, Gemini and more, put in local perspective. Free, open source, private by design." />
+  <meta property="og:url" content="https://rishinkalra.github.io/ai-footprint/" />
+  <meta property="og:image" content="https://rishinkalra.github.io/ai-footprint/assets/brand/social-preview.png" />
+  <meta property="og:image:width" content="1280" />
+  <meta property="og:image:height" content="640" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preload" href="assets/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <div class="wrap top-row">
+      <a class="brand" href="./" aria-label="AI Footprint home">
+        <picture>
+          <source srcset="assets/brand/mark-on-dark.svg" media="(prefers-color-scheme: dark)" />
+          <img src="assets/brand/mark.svg" alt="" width="28" height="28" />
+        </picture>
+        <span>AI Footprint</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href="#calculator">Where you live</a>
+        <a href="#privacy">Privacy</a>
+        <a href="https://github.com/rishinkalra/ai-footprint/blob/main/METHODOLOGY.md">Method</a>
+        <a class="nav-gh" href="https://github.com/rishinkalra/ai-footprint">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Free and open source</p>
+          <h1>Every AI reply uses energy. Now you can see how much.</h1>
+          <p class="lede">AI Footprint shows the energy, carbon, water and cost behind each reply on ChatGPT, Claude, Gemini and more, in terms that make sense where you live. It all runs on your device.</p>
+          <div class="cta">
+            <a class="btn primary" id="dl-chrome" href="https://github.com/rishinkalra/ai-footprint/releases/latest">
+              <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18"><path d="M10 3v10m0 0-4-4m4 4 4-4M4 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Get it for Chrome, Edge, Brave
+            </a>
+            <a class="btn" id="dl-firefox" href="https://github.com/rishinkalra/ai-footprint/releases/latest">Firefox</a>
+            <a class="btn ghost" href="https://github.com/rishinkalra/ai-footprint">
+              <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+              View the code
+            </a>
+          </div>
+          <p class="fine" id="dl-note">Store listings are on the way. Until then, <a href="#install">installing takes about a minute</a>.</p>
+        </div>
+        <figure class="hero-shot">
+          <img src="assets/img/screenshot-1-badge.png" width="1280" height="800" alt="A chat reply with the AI Footprint badge underneath, opened to show its energy, carbon and water" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- Key facts -->
+    <section class="facts" aria-label="What a number means">
+      <div class="wrap facts-grid">
+        <div class="fact">
+          <p class="num big">0.3<span class="unit"> Wh</span></p>
+          <p>A typical chat reply. About what a laptop uses in a few seconds.</p>
+        </div>
+        <div class="fact">
+          <p class="num big">10–1000<span class="unit">×</span></p>
+          <p>More for long chats, thinking models, generated images and coding agents.</p>
+        </div>
+        <div class="fact">
+          <p class="num big">0.4–3<span class="unit">×</span></p>
+          <p>The likely range we always show. Nobody knows the exact figure, so we say so.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Calculator -->
+    <section class="section" id="calculator">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>What does your AI use mean where you live?</h2>
+          <p class="muted">The same energy means very different things in different places. This uses the extension's own code and country data.</p>
+        </div>
+
+        <div class="calc card">
+          <form class="calc-inputs" id="calc-form" onsubmit="return false">
+            <label class="field">
+              <span class="label">Country</span>
+              <select id="country"></select>
+            </label>
+
+            <div class="field">
+              <div class="field-row"><label class="label" for="chats">Chat replies a day</label><output id="chats-out" for="chats">30</output></div>
+              <input type="range" id="chats" min="0" max="300" step="5" value="30" />
+            </div>
+            <div class="field">
+              <div class="field-row"><label class="label" for="images">Generated images a day</label><output id="images-out" for="images">0</output></div>
+              <input type="range" id="images" min="0" max="50" step="1" value="0" />
+            </div>
+            <div class="field">
+              <div class="field-row"><label class="label" for="agent">Coding-agent steps a day</label><output id="agent-out" for="agent">0</output></div>
+              <input type="range" id="agent" min="0" max="1000" step="10" value="0" />
+            </div>
+            <p class="fine">A typical reply uses 0.3 Wh, an image 2.9 Wh and a coding-agent step about 4 Wh. Long chats and thinking models use more. <a href="https://github.com/rishinkalra/ai-footprint/blob/main/METHODOLOGY.md">How these are worked out</a>.</p>
+          </form>
+
+          <div class="calc-out" aria-live="polite">
+            <p class="label">Each day</p>
+            <p class="cmp" id="out-cmp">Like a ceiling fan running for 7 minutes</p>
+            <p class="out-energy"><span class="num" id="out-wh">9</span> <span class="unit" id="out-wh-unit">Wh</span> <span class="muted" id="out-range">(likely 3.6–27 Wh)</span></p>
+
+            <div class="share">
+              <p><span class="num" id="out-share">0.4%</span> of one person's daily electricity in <span id="out-country">India</span></p>
+              <div class="bars" id="out-bars"></div>
+            </div>
+
+            <div class="year">
+              <p class="label">Over a year</p>
+              <ul>
+                <li><span class="k">Energy</span> <span id="yr-wh">3.3 kWh</span></li>
+                <li><span class="k">Carbon</span> <span id="yr-co2">1.3 kg CO₂e<span class="sub">like driving 7.4 km</span></span></li>
+                <li><span class="k">Water for cooling</span> <span id="yr-water">about 3.6 litres</span></li>
+              </ul>
+              <p class="fine">Carbon uses the US grid, where most chat AI runs. In the extension you can choose your own grid instead.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two parts -->
+    <section class="section alt">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Two parts, one method</h2>
+          <p class="muted">Both use the same open methodology, and tests keep their figures identical.</p>
+        </div>
+        <div class="parts">
+          <article class="part card">
+            <img src="assets/img/screenshot-2-popup.png" width="1280" height="800" alt="The extension popup with weekly totals, a goal ring, a daily chart and a list of apps" loading="lazy" />
+            <div class="part-body">
+              <h3>Browser extension</h3>
+              <p>For anyone using AI chat in a browser. A small badge under each reply, a popup with your totals, and tips at the moment they help.</p>
+              <ul class="chips" aria-label="Supported sites">
+                <li>ChatGPT</li><li>Claude</li><li>Gemini</li><li>Perplexity</li><li>Microsoft Copilot</li><li>DeepSeek</li><li>Le Chat</li><li>Grok</li>
+              </ul>
+            </div>
+          </article>
+          <article class="part card">
+            <picture>
+              <source srcset="assets/img/dashboard-dark.png" media="(prefers-color-scheme: dark)" />
+              <img src="assets/img/dashboard-light.png" width="1180" height="1407" alt="The dashboard showing spend, energy, carbon and water by platform and model" loading="lazy" />
+            </picture>
+            <div class="part-body">
+              <h3>Dashboard</h3>
+              <p>For developers, power users and teams. Reads Claude Code, Codex CLI and OpenClaw logs, provider usage reports and chat exports, and shows money, energy, carbon and water for any date range.</p>
+              <pre class="code"><code>cd dashboard &amp;&amp; npm install &amp;&amp; npm start</code></pre>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Honest numbers, in plain words</h2>
+        </div>
+        <div class="features">
+          <div class="feature">
+            <h3>Local perspective</h3>
+            <p>10 Wh is 2% of a day's electricity for one person in Nigeria and 0.02% in Canada. Comparisons, units and carbon follow where you live.</p>
+          </div>
+          <div class="feature">
+            <h3>Everyday comparisons</h3>
+            <p>"Like a ceiling fan running for 1.6 hours" in India, "a microwave for 6 minutes" in the US, "4.8 cups of tea" in the UK. The number sits underneath.</p>
+          </div>
+          <div class="feature">
+            <h3>Correct formulas</h3>
+            <p>Accounts for prompt caching in follow-ups, languages that need more tokens, and hidden reasoning in thinking models. Every rule has a worked example that is also a test.</p>
+          </div>
+          <div class="feature">
+            <h3>Nudges, not guilt</h3>
+            <p>One small, specific tip when it helps, like starting a fresh chat when a long one makes every reply heavier.</p>
+          </div>
+        </div>
+        <div class="gallery">
+          <figure><img src="assets/img/screenshot-3-tips.png" width="1280" height="800" alt="A tip about long chats shown on a dark chat page" loading="lazy" /><figcaption>A tip at the moment it helps</figcaption></figure>
+          <figure><img src="assets/img/screenshot-5-share.png" width="1280" height="800" alt="A shareable card with a month's energy, carbon, water and trend" loading="lazy" /><figcaption>A monthly card you can share</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy -->
+    <section class="section alt" id="privacy">
+      <div class="wrap privacy">
+        <div>
+          <h2>Private by design</h2>
+          <ul class="checks">
+            <li><strong>Counts, never content.</strong> It measures how long messages are. It never stores or sends what you type or what the AI says.</li>
+            <li><strong>Stays on your device.</strong> No account, no analytics, no server. Syncing to a dashboard is off unless you turn it on.</li>
+            <li><strong>Checkable.</strong> Plain JavaScript with no build step, all on GitHub. <a href="https://github.com/rishinkalra/ai-footprint/blob/main/extension/PRIVACY.md">Read the privacy policy</a>.</li>
+          </ul>
+        </div>
+        <img src="assets/img/screenshot-4-private.png" width="1280" height="800" alt="The extension's privacy screen explaining that only lengths are counted" loading="lazy" />
+      </div>
+    </section>
+
+    <!-- Install -->
+    <section class="section" id="install">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Install in about a minute</h2>
+          <p class="muted">Store listings are coming. Until then, load it straight from the latest release.</p>
+        </div>
+        <ol class="steps">
+          <li class="card">
+            <span class="step-n">1</span>
+            <h3>Download</h3>
+            <p>Get the zip for <a id="dl-chrome-2" href="https://github.com/rishinkalra/ai-footprint/releases/latest">Chrome, Edge, Brave, Arc or Opera</a>, or <a id="dl-firefox-2" href="https://github.com/rishinkalra/ai-footprint/releases/latest">Firefox</a>, and unzip it.</p>
+          </li>
+          <li class="card">
+            <span class="step-n">2</span>
+            <h3>Open extensions</h3>
+            <p>Go to <code>chrome://extensions</code> and turn on <strong>Developer mode</strong>. On Firefox or Safari, follow the <a href="https://github.com/rishinkalra/ai-footprint/blob/main/extension/README.md#develop">short guide</a>.</p>
+          </li>
+          <li class="card">
+            <span class="step-n">3</span>
+            <h3>Load it</h3>
+            <p>Click <strong>Load unpacked</strong>, choose the unzipped folder, then open any AI chat. The badge appears under the next reply.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Contribute -->
+    <section class="section alt">
+      <div class="wrap contribute">
+        <h2>Help make it better</h2>
+        <p>You don't need to be a developer. Reporting a site that stopped working, a better data source, or a translation helps just as much.</p>
+        <div class="cta center">
+          <a class="btn primary" href="https://github.com/rishinkalra/ai-footprint">Star on GitHub</a>
+          <a class="btn" href="https://github.com/rishinkalra/ai-footprint/blob/main/CONTRIBUTING.md">How to contribute</a>
+          <a class="btn ghost" href="https://github.com/rishinkalra/ai-footprint/discussions">Ask a question</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-row">
+      <p>Code under the <a href="https://github.com/rishinkalra/ai-footprint/blob/main/LICENSE">Apache License 2.0</a>. The name and logo are not covered by it; see <a href="https://github.com/rishinkalra/ai-footprint/blob/main/TRADEMARKS.md">trademarks</a>.</p>
+      <p>Country data: Ember, via Our World in Data (CC BY 4.0). Fonts: Bricolage Grotesque and Figtree (SIL OFL). Not affiliated with any AI provider named here.</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/footprint/i18n.js"></script>
+  <script src="assets/js/footprint/locales/en.js"></script>
+  <script src="assets/js/footprint/format.js"></script>
+  <script src="assets/js/footprint/regions-data.js"></script>
+  <script src="assets/js/footprint/regions.js"></script>
+  <script src="assets/js/footprint/compare.js"></script>
+  <script src="site.js"></script>
+</body>
+</html>
